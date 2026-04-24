@@ -9,6 +9,10 @@ interface ImportMetaEnv {
   readonly VITE_USER_ID?: string
   /** Même segment que N8N_WEBHOOK_PATH_SEGMENT (ia_back) — path après /webhook/ */
   readonly VITE_N8N_WEBHOOK_PATH_SEGMENT?: string
+  /** UI : fr (défaut) ou en */
+  readonly VITE_DEFAULT_LOCALE?: 'fr' | 'en'
+  /** Forcer l’exigence de session JWT côté chat (aligné back WEBHOOK_JWT_ONLY) */
+  readonly VITE_BI_CHAT_SESSION_ONLY?: 'true' | 'false'
 }
 
 interface ImportMeta {

@@ -72,3 +72,26 @@ code {
   background: var(--code-bg);
   color: var(--text-h);
 }
+
+.nav-a {
+  color: var(--text-h);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 6px;
+}
+
+.nav-a:hover {
+  background: var(--code-bg);
+}
+
+.nav-a.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.page-wait {
+  padding: 1rem 0.75rem;
+  color: var(--text-h);
+  margin: 0;
+}

@@ -1,0 +1,272 @@
+/* Zone admin : menu vertical à gauche, contenu à droite */
+.admin-shell {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.admin-sidebar {
+  width: 12rem;
+  flex-shrink: 0;
+  padding: 0.75rem 0.5rem 1rem;
+  border-right: 1px solid var(--border);
+  background: var(--code-bg, #1f2028);
+}
+
+.admin-sidebar-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  opacity: 0.85;
+  margin: 0 0 0.65rem 0.35rem;
+  padding: 0;
+}
+
+.admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+a.admin-nav-link {
+  display: block;
+  padding: 0.5rem 0.5rem 0.5rem 0.65rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text-h);
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+}
+
+a.admin-nav-link:hover {
+  background: var(--card-bg, rgba(0, 0, 0, 0.08));
+}
+
+a.admin-nav-link.is-active {
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-bg);
+  border-color: var(--accent-border, transparent);
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.page-form,
+.admin-page {
+  padding: 0.5rem 0.25rem 1.25rem;
+  max-width: 52rem;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+
+.page-form h1,
+.admin-page h1 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.sub {
+  color: var(--text);
+  font-size: 0.92rem;
+  margin: 0 0 1rem;
+  line-height: 1.45;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-row label {
+  font-size: 0.88rem;
+  color: var(--text-h);
+}
+
+.form-row input {
+  max-width: 24rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg, var(--bg));
+  color: var(--text-h);
+  font: inherit;
+}
+
+.form-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  background: var(--code-bg);
+  color: var(--text-h);
+}
+
+.btn.primary {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  color: var(--text-h);
+}
+
+.btn.ghost {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.admin-section {
+  margin-bottom: 2rem;
+}
+
+.admin-section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+
+.admin-section h3 {
+  font-size: 0.95rem;
+  margin: 1rem 0 0.4rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-bottom: 0.75rem;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  padding: 0.4rem 0.35rem;
+  vertical-align: top;
+}
+
+.data-table th {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+  margin-top: 0.25rem;
+}
+
+.inline-form input,
+.inline-form select {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg, var(--bg));
+  color: var(--text-h);
+  font: inherit;
+  min-width: 10rem;
+}
+
+.form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.form-grid input {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg, var(--bg));
+  color: var(--text-h);
+  font: inherit;
+  min-width: 8rem;
+}
+
+.table-checks {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  max-height: 40vh;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.table-checks li {
+  margin: 0.25rem 0;
+}
+
+.table-checks label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--card-bg, var(--bg));
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-width: 32rem;
+  width: 100%;
+  max-height: 85vh;
+  overflow: auto;
+  padding: 1rem 1.1rem 1.1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.modal h3 {
+  margin: 0 0 0.25rem;
+  color: var(--text-h);
+  font-size: 1.05rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}

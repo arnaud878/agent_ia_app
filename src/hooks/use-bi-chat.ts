@@ -5,8 +5,10 @@ import {
   useState,
   type KeyboardEvent,
 } from 'react'
+import { useAuth } from '@/auth/AuthContext'
 import { getBiStreamPostUrl, buildBiStreamRequestInit } from '@/api/bi-webhook'
-import { getAppEnv, isEnvReady } from '@/config/env'
+import { getAppEnv, isEnvReady, resolveChatSessionOnly } from '@/config/env'
+import { t } from '@/i18n'
 import {
   STICK_TO_BOTTOM_PX,
   STREAM_LOG_KEEP,
@@ -24,8 +26,19 @@ function appendStreamLog(prev: string[], line: string): string[] {
 }
 
 export function useBiChat() {
-  const { baseUrl, userId, apiConfig } = getAppEnv()
-  const configOk = isEnvReady({ baseUrl, userId, apiConfig })
+  const { token: accessToken, user: authUser, authConfig, configLoaded } =
+    useAuth()
+  const { baseUrl, userId: envUserId, apiConfig } = getAppEnv()
+  const userId = authUser?.id || envUserId
+  const sessionOnly = resolveChatSessionOnly(
+    authConfig?.webhookJwtOnly,
+    configLoaded,
+  )
+  const configOk = isEnvReady(
+    { baseUrl, userId: envUserId, apiConfig },
+    { accessToken, userId: authUser?.id || null },
+    { sessionOnly },
+  )
 
   const [chatId, setChatId] = useState(() => {
     const fromSession = readSessionChatId()
@@ -105,14 +118,10 @@ export function useBiChat() {
     if (!text || loading) {
       return
     }
-    if (!apiConfig) {
+    if (!configOk) {
       setBanner(
-        'Définissez VITE_X_API_CONFIG dans .env (identique à API_CONFIG_SECRET du back), puis redémarrez le dev server.',
+        t(sessionOnly ? 'chat.error.session' : 'chat.error.config'),
       )
-      return
-    }
-    if (!userId) {
-      setBanner('Définissez VITE_USER_ID dans .env, puis redémarrez le dev server.')
       return
     }
 
@@ -131,7 +140,7 @@ export function useBiChat() {
 
     const url = getBiStreamPostUrl(baseUrl)
     const t0 = performance.now()
-    const env = { baseUrl, userId, apiConfig }
+    const env = { baseUrl, userId, apiConfig, accessToken }
 
     try {
       const res = await fetch(
@@ -233,7 +242,17 @@ export function useBiChat() {
       setStreamLines([])
       setLoading(false)
     }
-  }, [apiConfig, baseUrl, chatId, draft, loading, userId])
+  }, [
+    apiConfig,
+    accessToken,
+    baseUrl,
+    chatId,
+    configOk,
+    draft,
+    loading,
+    sessionOnly,
+    userId,
+  ])
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -246,6 +265,7 @@ export function useBiChat() {
     baseUrl,
     userId,
     configOk,
+    sessionOnly,
     chatId,
     messages,
     draft,

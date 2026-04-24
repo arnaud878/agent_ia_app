@@ -17,17 +17,23 @@ export type BiChatRequestBody = {
   userId: string
 }
 
+/** Si `accessToken` est défini, en-tête Bearer (rôle + tables). Sinon `x-api-config` (intégration n8n). */
 export function buildBiStreamRequestInit(
   body: BiChatRequestBody,
-  env: AppEnv,
+  env: AppEnv & { accessToken: string | null },
 ): RequestInit {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/x-ndjson, application/json',
+  }
+  if (env.accessToken) {
+    headers['Authorization'] = `Bearer ${env.accessToken}`
+  } else {
+    headers['x-api-config'] = env.apiConfig
+  }
   return {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/x-ndjson, application/json',
-      'x-api-config': env.apiConfig,
-    },
+    headers,
     body: JSON.stringify(body),
   }
 }

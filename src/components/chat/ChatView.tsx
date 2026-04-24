@@ -5,6 +5,7 @@ import type {
   SetStateAction,
 } from 'react'
 import { AssistantHtmlFrame } from '@/components/assistant/AssistantHtmlFrame'
+import { t } from '@/i18n'
 import { formatDurationMs } from '@/lib/format-duration'
 import type { ChatMessage } from '@/types/chat'
 
@@ -12,6 +13,8 @@ export type ChatViewProps = {
   baseUrl: string
   userId: string
   configOk: boolean
+  /** Si true, pas d’accès par clé .env (config serveur VITE/WEBHOOK_JWT_ONLY) */
+  sessionOnly: boolean
   chatId: string
   messages: ChatMessage[]
   draft: string
@@ -37,6 +40,7 @@ export function ChatView(props: ChatViewProps) {
     baseUrl,
     userId,
     configOk,
+    sessionOnly,
     chatId,
     messages,
     draft,
@@ -61,24 +65,24 @@ export function ChatView(props: ChatViewProps) {
     <div className="chat-app">
       <header className="chat-header">
         <div className="chat-brand">
-          <h1>Assistant BI</h1>
-          <span className="chat-sub">ia_back</span>
+          <h1>{t('chat.title')}</h1>
+          <span className="chat-sub">{t('chat.backend')}</span>
         </div>
         <div className="chat-actions">
-          <span className="chat-meta" title="Identifiant de session">
-            chatId · {chatId.slice(0, 8)}…
+          <span className="chat-meta" title={t('chat.sessionTitle')}>
+            {t('chat.sessionPrefix')} · {chatId.slice(0, 8)}…
           </span>
           <button type="button" className="btn ghost" onClick={newConversation}>
-            Nouvelle conversation
+            {t('chat.newConversation')}
           </button>
         </div>
       </header>
 
       {!configOk && (
         <div className="config-banner" role="status">
-          Fichier <code>.env</code> : renseignez <code>VITE_X_API_CONFIG</code> et{' '}
-          <code>VITE_USER_ID</code> (et optionnellement <code>VITE_API_BASE</code>
-          ), puis relancez <code>npm run dev</code>.
+          {sessionOnly
+            ? t('chat.banner.session')
+            : t('chat.banner.config')}
         </div>
       )}
 
@@ -97,8 +101,8 @@ export function ChatView(props: ChatViewProps) {
         >
           {messages.length === 0 && !loading && (
             <p className="chat-empty">
-              Posez une question sur les données. <kbd>Shift+Entrée</kbd> pour
-              une nouvelle ligne.
+              {t('chat.empty.hint')}{' '}
+              <kbd>{t('chat.empty.kbd')}</kbd> {t('chat.empty.shift')}
             </p>
           )}
           {messages.map((msg) => (
@@ -107,17 +111,17 @@ export function ChatView(props: ChatViewProps) {
               className={`chat-bubble ${msg.role === 'user' ? 'user' : 'assistant'}`}
             >
               {msg.role === 'user' && (
-                <div className="bubble-label">Vous</div>
+                <div className="bubble-label">{t('chat.role.user')}</div>
               )}
               {msg.role === 'assistant' && (
-                <div className="bubble-label">Assistant</div>
+                <div className="bubble-label">{t('chat.role.assistant')}</div>
               )}
               {msg.text && <div className="bubble-text">{msg.text}</div>}
               {msg.html && <AssistantHtmlFrame html={msg.html} />}
               {msg.durationMs != null && (
                 <div
                   className="bubble-timing"
-                  title="Durée mesurée côté navigateur (appel complet)"
+                  title={t('chat.timingTitle')}
                 >
                   {formatDurationMs(msg.durationMs)}
                 </div>
@@ -126,16 +130,14 @@ export function ChatView(props: ChatViewProps) {
           ))}
           {loading && (
             <div className="chat-bubble assistant typing stream-bubble">
-              <div className="bubble-label">Assistant</div>
+              <div className="bubble-label">{t('chat.role.assistant')}</div>
               {streamLines.length > 0 && (
                 <>
-                  <p className="stream-log-hint">
-                    Analyse des données en cours...
-                  </p>
+                  <p className="stream-log-hint">{t('chat.streamHint')}</p>
                   <ol
                     className="stream-log"
                     ref={streamListRef}
-                    aria-label="Étapes intermédiaires avant la réponse"
+                    aria-label={t('chat.streamLogLabel')}
                   >
                     {streamLines.map((line, i) => (
                       <li key={`${i}-${line.slice(0, 32)}`}>{line}</li>
@@ -163,8 +165,8 @@ export function ChatView(props: ChatViewProps) {
           rows={2}
           placeholder={
             configOk
-              ? 'Votre message…'
-              : 'Configurez le .env pour envoyer des messages'
+              ? t('chat.placeholderReady')
+              : t('chat.placeholderNoConfig')
           }
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -177,7 +179,7 @@ export function ChatView(props: ChatViewProps) {
           onClick={() => void send()}
           disabled={!configOk || loading || !draft.trim()}
         >
-          {loading ? '…' : 'Envoyer'}
+          {loading ? t('chat.sending') : t('chat.send')}
         </button>
       </footer>
 
@@ -185,7 +187,7 @@ export function ChatView(props: ChatViewProps) {
         <code>{baseUrl}</code>
         {userId && (
           <span>
-            · user <code>{userId}</code>
+            · {t('chat.tech.user')} <code>{userId}</code>
           </span>
         )}
         {lastRaw !== null && (
@@ -194,7 +196,7 @@ export function ChatView(props: ChatViewProps) {
             className="linkish"
             onClick={() => setShowRaw((s) => !s)}
           >
-            {showRaw ? 'Masquer' : 'Voir'} le JSON
+            {showRaw ? t('chat.rawToggleHide') : t('chat.rawToggleShow')}
           </button>
         )}
       </div>
