@@ -48,6 +48,11 @@ const fr = {
   'chat.placeholderNoConfig': 'Configurez le .env pour envoyer des messages',
   'chat.send': 'Envoyer',
   'chat.sending': '…',
+  'chat.responseMode': 'Réponse',
+  'chat.responseModeQuick': 'Rapide',
+  'chat.responseModePro': 'Pro',
+  'chat.responseModeAria':
+    'Mode de réponse : Rapide (texte court, sans graphique) ou Pro (analyse complète avec graphiques)',
   'chat.tech.user': 'user',
   'chat.rawToggleHide': 'Masquer le JSON',
   'chat.rawToggleShow': 'Voir le JSON',
@@ -184,6 +189,11 @@ const en: Record<keyof typeof fr, string> = {
   'chat.placeholderNoConfig': 'Configure .env to send messages',
   'chat.send': 'Send',
   'chat.sending': '…',
+  'chat.responseMode': 'Response',
+  'chat.responseModeQuick': 'Quick',
+  'chat.responseModePro': 'Pro',
+  'chat.responseModeAria':
+    'Response mode: Quick (short text, no chart) or Pro (full analysis with charts)',
   'chat.tech.user': 'user',
   'chat.rawToggleHide': 'Hide JSON',
   'chat.rawToggleShow': 'View JSON',

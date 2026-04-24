@@ -7,7 +7,11 @@ import {
   type KeyboardEvent,
 } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { getBiStreamPostUrl, buildBiStreamRequestInit } from '@/api/bi-webhook'
+import {
+  getBiStreamPostUrl,
+  buildBiStreamRequestInit,
+  type BiResponseMode,
+} from '@/api/bi-webhook'
 import {
   type AppendUiMessageBody,
   apiDeleteConversation,
@@ -19,7 +23,7 @@ import {
 } from '@/api/chat-conversations'
 import { useAuth } from '@/auth/AuthContext'
 import { getAppEnv, isEnvReady, resolveChatSessionOnly } from '@/config/env'
-import { STICK_TO_BOTTOM_PX } from '@/config/constants'
+import { BI_RESPONSE_MODE_KEY, STICK_TO_BOTTOM_PX } from '@/config/constants'
 import { useI18n } from '@/i18n'
 import {
   appendStreamLog,
@@ -32,6 +36,18 @@ import { qkConversations } from '@/lib/query-keys'
 import { readSessionChatId, writeSessionChatId } from '@/lib/session-chat-id'
 import type { ChatMessage } from '@/types/chat'
 import type { NdEvent } from '@/types/ndjson'
+
+function readStoredResponseMode(): BiResponseMode {
+  try {
+    const s = sessionStorage.getItem(BI_RESPONSE_MODE_KEY)
+    if (s === 'quick' || s === 'pro') {
+      return s
+    }
+  } catch {
+    /* ignore */
+  }
+  return 'pro'
+}
 
 export function useBiChat() {
   const { t } = useI18n()
@@ -64,6 +80,9 @@ export function useBiChat() {
   /** Affichage : à 0 dès que le chargement est terminé (évite setState dans l’effet du timer) */
   const displayLiveElapsedMs = loading ? liveElapsedMs : 0
   const [streamLines, setStreamLines] = useState<string[]>([])
+  const [responseMode, setResponseMode] = useState<BiResponseMode>(
+    readStoredResponseMode,
+  )
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const threadRef = useRef<HTMLDivElement>(null)
@@ -260,6 +279,14 @@ export function useBiChat() {
   }, [chatId])
 
   useEffect(() => {
+    try {
+      sessionStorage.setItem(BI_RESPONSE_MODE_KEY, responseMode)
+    } catch {
+      /* ignore */
+    }
+  }, [responseMode])
+
+  useEffect(() => {
     if (!loading) {
       return
     }
@@ -404,7 +431,7 @@ export function useBiChat() {
       const res = await fetch(
         url,
         buildBiStreamRequestInit(
-          { message: text, chatId, userId },
+          { message: text, chatId, userId, responseMode },
           env,
         ),
       )
@@ -533,6 +560,7 @@ export function useBiChat() {
     sessionOnly,
     t,
     userId,
+    responseMode,
     setBanner,
     setMessages,
     setDraft,
@@ -584,5 +612,7 @@ export function useBiChat() {
     conversationsError,
     selectConversation,
     deleteConversation,
+    responseMode,
+    setResponseMode,
   }
 }

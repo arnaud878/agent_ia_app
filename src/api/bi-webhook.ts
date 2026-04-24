@@ -12,10 +12,14 @@ export function getBiStreamPostUrl(baseUrl: string): string {
   )
 }
 
+export type BiResponseMode = 'quick' | 'pro'
+
 export type BiChatRequestBody = {
   message: string
   chatId: string
   userId: string
+  /** Rapide : pas de graphique ; Pro : réponse complète avec Chart.js (défaut côté serveur si absent). */
+  responseMode?: BiResponseMode
 }
 
 /** Si `accessToken` est défini, en-tête Bearer (rôle + tables). Sinon `x-api-config` (intégration n8n). */

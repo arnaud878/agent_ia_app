@@ -11,6 +11,9 @@ export const WEBHOOK_STREAM_SUFFIX = 'stream' as const
 
 export const SESSION_CHAT_ID_KEY = 'ia_front_chat_id' as const
 
+/** Mode de réponse BI (`quick` | `pro`), persistant par onglet. */
+export const BI_RESPONSE_MODE_KEY = 'ia_bi_response_mode' as const
+
 /** Limite d’affichage du journal d’étapes (streaming). */
 export const STREAM_LOG_MAX = 80
 export const STREAM_LOG_KEEP = 60

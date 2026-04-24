@@ -10,6 +10,7 @@ import type { ConversationRow } from '@/api/chat-conversations'
 import { useI18n } from '@/i18n'
 import { useTheme } from '@/theme/ThemeContext'
 import { formatDurationMs } from '@/lib/format-duration'
+import type { BiResponseMode } from '@/api/bi-webhook'
 import type { ChatMessage } from '@/types/chat'
 
 export type ChatViewProps = {
@@ -44,6 +45,8 @@ export type ChatViewProps = {
   conversationsError: boolean
   selectConversation: (id: string) => void
   deleteConversation: (id: string) => void
+  responseMode: BiResponseMode
+  setResponseMode: Dispatch<SetStateAction<BiResponseMode>>
 }
 
 export function ChatView(props: ChatViewProps) {
@@ -79,6 +82,8 @@ export function ChatView(props: ChatViewProps) {
     conversationsError,
     selectConversation,
     deleteConversation,
+    responseMode,
+    setResponseMode,
   } = props
 
   return (
@@ -229,14 +234,34 @@ export function ChatView(props: ChatViewProps) {
           onKeyDown={onKeyDown}
           disabled={!configOk || loading}
         />
-        <button
-          type="button"
-          className="btn send"
-          onClick={() => void send()}
-          disabled={!configOk || loading || !draft.trim()}
-        >
-          {loading ? t('chat.sending') : t('chat.send')}
-        </button>
+        <div className="chat-composer-side">
+          <label className="chat-mode-field">
+            <span className="chat-mode-label">{t('chat.responseMode')}</span>
+            <select
+              className="chat-mode-select"
+              value={responseMode}
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === 'quick' || v === 'pro') {
+                  setResponseMode(v)
+                }
+              }}
+              disabled={loading}
+              aria-label={t('chat.responseModeAria')}
+            >
+              <option value="quick">{t('chat.responseModeQuick')}</option>
+              <option value="pro">{t('chat.responseModePro')}</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            className="btn send"
+            onClick={() => void send()}
+            disabled={!configOk || loading || !draft.trim()}
+          >
+            {loading ? t('chat.sending') : t('chat.send')}
+          </button>
+        </div>
       </footer>
 
       <div className="chat-footer-tech">

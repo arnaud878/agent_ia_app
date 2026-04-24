@@ -397,6 +397,53 @@ html[data-theme='dark'] .stream-log {
   flex-shrink: 0;
 }
 
+.chat-composer-side {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.chat-mode-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  color: var(--text);
+  opacity: 0.9;
+}
+
+.chat-mode-label {
+  white-space: nowrap;
+}
+
+.chat-mode-select {
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.35rem 1.5rem 0.35rem 0.45rem;
+  cursor: pointer;
+  min-width: 6.5rem;
+}
+
+.chat-mode-select:hover:not(:disabled) {
+  border-color: var(--accent-border);
+}
+
+.chat-mode-select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.chat-mode-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .chat-input {
   flex: 1;
   font: inherit;
