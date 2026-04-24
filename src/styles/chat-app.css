@@ -445,9 +445,16 @@ html[data-theme='dark'] .stream-log {
   opacity: 1;
 }
 
-/* Langue : drapeau + <select> (barre de nav) */
-.app-nav .nav-locale {
+/* Thème + langue (barre de nav, alignés à droite) */
+.app-nav .nav-toolbar-end {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.app-nav .nav-locale {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -457,6 +464,30 @@ html[data-theme='dark'] .stream-log {
 .app-nav .nav-locale-label {
   opacity: 0.75;
   white-space: nowrap;
+}
+
+.app-nav .nav-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0.35rem;
+  line-height: 0;
+}
+
+.app-nav .nav-theme-toggle svg {
+  flex-shrink: 0;
+}
+
+.app-nav .nav-theme-icon--sun {
+  color: #f59e0b;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.35));
+}
+
+.app-nav .nav-theme-icon--moon {
+  color: #818cf8;
+  filter: drop-shadow(0 0 6px rgba(129, 140, 248, 0.35));
 }
 
 .app-nav .nav-locale-flag {

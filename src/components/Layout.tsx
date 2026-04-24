@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
 import { useI18n, type AppLocale } from '@/i18n'
-import { useTheme, type AppTheme } from '@/theme/ThemeContext'
+import { useTheme } from '@/theme/ThemeContext'
 import '../styles/chat-app.css'
 
 const LOCALE_FLAG: Record<AppLocale, string> = {
@@ -9,9 +9,50 @@ const LOCALE_FLAG: Record<AppLocale, string> = {
   en: '🇬🇧',
 }
 
+function IconSun({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </svg>
+  )
+}
+
+function IconMoon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  )
+}
+
 export function Layout() {
   const { t, locale, setLocale } = useI18n()
-  const { theme, setTheme } = useTheme()
+  const { theme, toggleTheme } = useTheme()
   const { user, logout, isAdmin, loading } = useAuth()
   const { pathname } = useLocation()
   const isAdminPath = pathname.startsWith('/admin')
@@ -70,48 +111,46 @@ export function Layout() {
             {t('nav.admin')}
           </NavLink>
         )}
-        <div className="nav-locale">
-          <span className="nav-locale-label">{t('nav.theme')}</span>
-          <select
-            className="nav-locale-select"
-            value={theme}
-            onChange={(e) => {
-              const v = e.target.value
-              if (v === 'light' || v === 'dark') {
-                setTheme(v as AppTheme)
+        <div className="nav-toolbar-end">
+          <div className="nav-locale">
+            <span className="nav-locale-label">{t('nav.theme')}</span>
+            <button
+              type="button"
+              className="nav-theme-toggle btn ghost"
+              onClick={() => toggleTheme()}
+              aria-label={
+                theme === 'light' ? t('nav.themeToDark') : t('nav.themeToLight')
               }
-            }}
-            aria-label={t('nav.themeAria')}
-          >
-            <option value="light">{t('nav.themeLight')}</option>
-            <option value="dark">{t('nav.themeDark')}</option>
-          </select>
-        </div>
-        <div className="nav-locale">
-          <span className="nav-locale-label">{t('nav.locale')}</span>
-          <span
-            className="nav-locale-flag"
-            aria-hidden
-            title={locale === 'fr' ? t('nav.localeFr') : t('nav.localeEn')}
-          >
-            {LOCALE_FLAG[locale]}
-          </span>
-          <select
-            className="nav-locale-select"
-            value={locale}
-            onChange={(e) => {
-              const v = e.target.value
-              if (v === 'fr' || v === 'en') setLocale(v)
-            }}
-            aria-label={t('nav.localeAria')}
-          >
-            <option value="fr" lang="fr">
-              {LOCALE_FLAG.fr} {t('nav.localeFr')}
-            </option>
-            <option value="en" lang="en">
-              {LOCALE_FLAG.en} {t('nav.localeEn')}
-            </option>
-          </select>
+              title={
+                theme === 'light' ? t('nav.themeToDark') : t('nav.themeToLight')
+              }
+            >
+              {theme === 'light' ? (
+                <IconSun className="nav-theme-icon nav-theme-icon--sun" />
+              ) : (
+                <IconMoon className="nav-theme-icon nav-theme-icon--moon" />
+              )}
+            </button>
+          </div>
+          <div className="nav-locale">
+           
+            <select
+              className="nav-locale-select"
+              value={locale}
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === 'fr' || v === 'en') setLocale(v)
+              }}
+              aria-label={t('nav.localeAria')}
+            >
+              <option value="fr" lang="fr">
+                {LOCALE_FLAG.fr} {t('nav.localeFr')}
+              </option>
+              <option value="en" lang="en">
+                {LOCALE_FLAG.en} {t('nav.localeEn')}
+              </option>
+            </select>
+          </div>
         </div>
         {user && (
           <>
