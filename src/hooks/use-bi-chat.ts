@@ -50,7 +50,7 @@ export function useBiChat() {
     { sessionOnly },
   )
 
-  const [chatId, setChatId] = useState(() => {
+  const [chatId, setChatId] = useState<string>(() => {
     const fromSession = readSessionChatId()
     return fromSession || crypto.randomUUID()
   })
@@ -72,14 +72,38 @@ export function useBiChat() {
   const ensuredSessionRef = useRef(false)
   const loadHistorySeqRef = useRef(0)
   const autoHistoryAttemptedForRef = useRef<string | null>(null)
+  /** Messages par conversation (session) : évite de refetch à chaque retour sur un fil. */
+  const messagesByConvCacheRef = useRef(new Map<string, ChatMessage[]>())
 
-  const { data: conversations, isLoading: conversationsLoading, isError: conversationsError } =
+  useEffect(() => {
+    messagesByConvCacheRef.current.set(
+      chatId,
+      messages.map((m) => ({ ...m })),
+    )
+  }, [chatId, messages])
+
+  const { data: conversationsQueryData, isLoading: conversationsLoading, isError: conversationsError } =
     useQuery({
       queryKey: qkConversations(baseUrl, accessToken),
       queryFn: () => apiListConversations(baseUrl, accessToken!),
       enabled: Boolean(accessToken && baseUrl),
       refetchOnMount: 'always',
     })
+
+  /** Dernière activité en tête (updatedAt, puis createdAt). */
+  const conversations = useMemo(() => {
+    if (!conversationsQueryData?.length) {
+      return conversationsQueryData
+    }
+    return [...conversationsQueryData].sort((a, b) => {
+      const u =
+        (Date.parse(b.updatedAt) || 0) - (Date.parse(a.updatedAt) || 0)
+      if (u !== 0) {
+        return u
+      }
+      return (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0)
+    })
+  }, [conversationsQueryData])
 
   const displayKey = useMemo(
     () =>
@@ -137,6 +161,22 @@ export function useBiChat() {
       const seq = ++loadHistorySeqRef.current
       setChatId(id)
       writeSessionChatId(id)
+
+      const stored = messagesByConvCacheRef.current.get(id)
+      if (stored !== undefined) {
+        if (seq !== loadHistorySeqRef.current) {
+          return
+        }
+        setMessages(stored.map((m) => ({ ...m })))
+        setLiveElapsedMs(0)
+        setLoading(false)
+        setBanner(null)
+        setLastRaw(null)
+        setStreamLines([])
+        stickToBottomRef.current = true
+        return
+      }
+
       setLiveElapsedMs(0)
       setLoading(true)
       setBanner(null)
@@ -191,6 +231,12 @@ export function useBiChat() {
     if (messages.length > 0 || autoHistoryAttemptedForRef.current === chatId) {
       return
     }
+    const fromCache = messagesByConvCacheRef.current.get(chatId)
+    if (fromCache !== undefined) {
+      setMessages(fromCache.map((m) => ({ ...m })))
+      autoHistoryAttemptedForRef.current = chatId
+      return
+    }
     autoHistoryAttemptedForRef.current = chatId
     void loadConversationHistory(chatId)
   }, [
@@ -201,6 +247,7 @@ export function useBiChat() {
     conversationsLoading,
     loadConversationHistory,
     messages.length,
+    setMessages,
   ])
 
   useEffect(() => {
@@ -318,6 +365,7 @@ export function useBiChat() {
       void (async () => {
         try {
           await apiDeleteConversation(baseUrl, accessToken, id)
+          messagesByConvCacheRef.current.delete(id)
           refreshConversationList()
           if (id === chatId) {
             newConversation()
