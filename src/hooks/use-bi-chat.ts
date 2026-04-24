@@ -162,21 +162,8 @@ export function useBiChat() {
       setChatId(id)
       writeSessionChatId(id)
 
-      const stored = messagesByConvCacheRef.current.get(id)
-      if (stored !== undefined) {
-        if (seq !== loadHistorySeqRef.current) {
-          return
-        }
-        setMessages(stored.map((m) => ({ ...m })))
-        setLiveElapsedMs(0)
-        setLoading(false)
-        setBanner(null)
-        setLastRaw(null)
-        setStreamLines([])
-        stickToBottomRef.current = true
-        return
-      }
-
+      /* Toujours recharger l’API : le cache de session pouvait figer un extrait
+       * incomplété si la fil s’est enrichi en base après la première visite. */
       setLiveElapsedMs(0)
       setLoading(true)
       setBanner(null)
@@ -229,12 +216,6 @@ export function useBiChat() {
       return
     }
     if (messages.length > 0 || autoHistoryAttemptedForRef.current === chatId) {
-      return
-    }
-    const fromCache = messagesByConvCacheRef.current.get(chatId)
-    if (fromCache !== undefined) {
-      setMessages(fromCache.map((m) => ({ ...m })))
-      autoHistoryAttemptedForRef.current = chatId
       return
     }
     autoHistoryAttemptedForRef.current = chatId
@@ -328,9 +309,6 @@ export function useBiChat() {
 
   const selectConversation = useCallback(
     async (id: string) => {
-      if (id === chatId && messages.length > 0) {
-        return
-      }
       if (!accessToken) {
         setChatId(id)
         writeSessionChatId(id)
@@ -343,15 +321,7 @@ export function useBiChat() {
       }
       await loadConversationHistory(id)
     },
-    [
-      accessToken,
-      chatId,
-      conversations,
-      loadConversationHistory,
-      messages.length,
-      setChatId,
-      setMessages,
-    ],
+    [accessToken, conversations, loadConversationHistory, setChatId, setMessages],
   )
 
   const deleteConversation = useCallback(

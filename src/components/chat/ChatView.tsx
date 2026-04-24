@@ -8,6 +8,7 @@ import { AssistantHtmlFrame } from '@/components/assistant/AssistantHtmlFrame'
 import { ChatConversationsPanel } from '@/components/chat/ChatConversationsPanel'
 import type { ConversationRow } from '@/api/chat-conversations'
 import { useI18n } from '@/i18n'
+import { useTheme } from '@/theme/ThemeContext'
 import { formatDurationMs } from '@/lib/format-duration'
 import type { ChatMessage } from '@/types/chat'
 
@@ -47,6 +48,7 @@ export type ChatViewProps = {
 
 export function ChatView(props: ChatViewProps) {
   const { t } = useI18n()
+  const { theme: colorScheme } = useTheme()
   const {
     baseUrl,
     userId,
@@ -162,7 +164,11 @@ export function ChatView(props: ChatViewProps) {
               )}
               {msg.role === 'assistant' &&
                 (msg.html ? (
-                  <AssistantHtmlFrame html={msg.html} />
+                  <AssistantHtmlFrame
+                    messageId={msg.id}
+                    html={msg.html}
+                    colorScheme={colorScheme}
+                  />
                 ) : (
                   msg.text && (
                     <div className="bubble-text">{msg.text}</div>

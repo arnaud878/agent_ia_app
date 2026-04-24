@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
 import { useI18n, type AppLocale } from '@/i18n'
+import { useTheme, type AppTheme } from '@/theme/ThemeContext'
 import '../styles/chat-app.css'
 
 const LOCALE_FLAG: Record<AppLocale, string> = {
@@ -10,6 +11,7 @@ const LOCALE_FLAG: Record<AppLocale, string> = {
 
 export function Layout() {
   const { t, locale, setLocale } = useI18n()
+  const { theme, setTheme } = useTheme()
   const { user, logout, isAdmin, loading } = useAuth()
   const { pathname } = useLocation()
   const isAdminPath = pathname.startsWith('/admin')
@@ -68,6 +70,23 @@ export function Layout() {
             {t('nav.admin')}
           </NavLink>
         )}
+        <div className="nav-locale">
+          <span className="nav-locale-label">{t('nav.theme')}</span>
+          <select
+            className="nav-locale-select"
+            value={theme}
+            onChange={(e) => {
+              const v = e.target.value
+              if (v === 'light' || v === 'dark') {
+                setTheme(v as AppTheme)
+              }
+            }}
+            aria-label={t('nav.themeAria')}
+          >
+            <option value="light">{t('nav.themeLight')}</option>
+            <option value="dark">{t('nav.themeDark')}</option>
+          </select>
+        </div>
         <div className="nav-locale">
           <span className="nav-locale-label">{t('nav.locale')}</span>
           <span
