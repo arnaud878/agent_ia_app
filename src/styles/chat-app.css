@@ -312,6 +312,61 @@
   padding: 0.4rem 0.6rem;
 }
 
+.btn.ghost.active {
+  background: var(--code-bg);
+  border-color: var(--border);
+  font-weight: 500;
+  opacity: 1;
+}
+
+/* Langue : drapeau + <select> (barre de nav) */
+.app-nav .nav-locale {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.app-nav .nav-locale-label {
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.app-nav .nav-locale-flag {
+  font-size: 1.15rem;
+  line-height: 1;
+  user-select: none;
+}
+
+.app-nav .nav-locale-select {
+  appearance: auto;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--text, #e4e4e6);
+  background: var(--code-bg, #2a2b33);
+  border: 1px solid var(--border, #2e303a);
+  border-radius: 6px;
+  padding: 0.35rem 1.75rem 0.35rem 0.5rem;
+  min-width: 5.5rem;
+  max-width: 9rem;
+}
+
+.app-nav .nav-locale-select:hover:not(:disabled) {
+  border-color: var(--accent-border, #4a4d5c);
+}
+
+.app-nav .nav-locale-select:focus {
+  outline: 2px solid var(--accent, #6b8cff);
+  outline-offset: 1px;
+}
+
+.app-nav .nav-locale-select option {
+  background: var(--code-bg, #1f2028);
+  color: var(--text, #e4e4e6);
+}
+
 .btn.send {
   background: var(--accent-bg);
   border-color: var(--accent-border);

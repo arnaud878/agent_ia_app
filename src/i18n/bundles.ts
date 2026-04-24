@@ -14,6 +14,10 @@ const fr = {
   'nav.admin': 'Administration',
   'nav.adminUsers': 'Utilisateurs',
   'nav.adminRoles': 'Rôles',
+  'nav.locale': 'Langue',
+  'nav.localeFr': 'FR',
+  'nav.localeEn': 'EN',
+  'nav.localeAria': 'Choisir la langue de l’interface (français ou anglais)',
   'nav.logout': 'Déconnexion',
   'app.wait': 'Chargement…',
   'chat.title': 'Assistant BI',
@@ -114,6 +118,9 @@ const fr = {
     'Le chat est limité aux comptes connectés. Utilisez « Connexion » (ou « Créer un compte » si l’inscription est activée).',
   'chat.error.config':
     'Utilisez la page Connexion (compte) ou le fichier .env : VITE_X_API_CONFIG + VITE_USER_ID (mode intégration).',
+  'chat.assistant.emptyBody': 'Réponse sans corps (stream).',
+  'chat.assistant.noOutputField': 'Réponse sans champ output.',
+  'chat.assistant.incomplete': 'Le flux s’est arrêté sans réponse complète.',
 } as const
 
 const en: Record<keyof typeof fr, string> = {
@@ -128,6 +135,10 @@ const en: Record<keyof typeof fr, string> = {
   'nav.admin': 'Administration',
   'nav.adminUsers': 'Users',
   'nav.adminRoles': 'Roles',
+  'nav.locale': 'Language',
+  'nav.localeFr': 'FR',
+  'nav.localeEn': 'EN',
+  'nav.localeAria': 'Choose interface language (French or English)',
   'nav.logout': 'Log out',
   'app.wait': 'Loading…',
   'chat.title': 'BI Assistant',
@@ -228,6 +239,9 @@ const en: Record<keyof typeof fr, string> = {
     'The chat is limited to signed-in accounts. Use “Log in” (or “Sign up” if enabled).',
   'chat.error.config':
     'Use the Log in page, or the .env file: VITE_X_API_CONFIG + VITE_USER_ID (integration mode).',
+  'chat.assistant.emptyBody': 'Empty response body (stream).',
+  'chat.assistant.noOutputField': 'Response without output field.',
+  'chat.assistant.incomplete': 'The stream ended without a complete answer.',
 }
 
 export type MessageKey = keyof typeof fr

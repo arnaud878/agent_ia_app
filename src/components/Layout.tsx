@@ -1,9 +1,15 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
-import { t } from '@/i18n'
+import { useI18n, type AppLocale } from '@/i18n'
 import '../styles/chat-app.css'
 
+const LOCALE_FLAG: Record<AppLocale, string> = {
+  fr: '🇫🇷',
+  en: '🇬🇧',
+}
+
 export function Layout() {
+  const { t, locale, setLocale } = useI18n()
   const { user, logout, isAdmin, loading } = useAuth()
   const { pathname } = useLocation()
   const isAdminPath = pathname.startsWith('/admin')
@@ -62,11 +68,37 @@ export function Layout() {
             {t('nav.admin')}
           </NavLink>
         )}
+        <div className="nav-locale">
+          <span className="nav-locale-label">{t('nav.locale')}</span>
+          <span
+            className="nav-locale-flag"
+            aria-hidden
+            title={locale === 'fr' ? t('nav.localeFr') : t('nav.localeEn')}
+          >
+            {LOCALE_FLAG[locale]}
+          </span>
+          <select
+            className="nav-locale-select"
+            value={locale}
+            onChange={(e) => {
+              const v = e.target.value
+              if (v === 'fr' || v === 'en') setLocale(v)
+            }}
+            aria-label={t('nav.localeAria')}
+          >
+            <option value="fr" lang="fr">
+              {LOCALE_FLAG.fr} {t('nav.localeFr')}
+            </option>
+            <option value="en" lang="en">
+              {LOCALE_FLAG.en} {t('nav.localeEn')}
+            </option>
+          </select>
+        </div>
         {user && (
           <>
             <span
               className="nav-user"
-              style={{ marginLeft: 'auto', fontSize: '0.85rem', opacity: 0.9 }}
+              style={{ fontSize: '0.85rem', opacity: 0.9 }}
             >
               {user.email} · {user.roleSlug}
             </span>

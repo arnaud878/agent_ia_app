@@ -10,12 +10,13 @@ import {
   apiSetRoleTables,
 } from '@/api/iam-client'
 import type { RoleRow, UserRow } from '@/auth/types'
-import { t } from '@/i18n'
+import { useI18n } from '@/i18n'
 
 /**
  * État partagé entre les écrans d’administration (utilisateurs / rôles).
  */
 export function useAdminIam() {
+  const { t } = useI18n()
   const { token, refreshUser } = useAuth()
   const baseUrl = getAppEnv().baseUrl
 
@@ -65,7 +66,7 @@ export function useAdminIam() {
         setError(e instanceof Error ? e.message : t('common.errorLoad'))
       }
     })()
-  }, [token, load, refreshUser])
+  }, [token, load, refreshUser, t])
 
   const onCreateUser = (e: FormEvent) => {
     e.preventDefault()

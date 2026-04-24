@@ -2,7 +2,7 @@ import { NavLink, Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
 import { PageWait } from '@/components/feedback/PageWait'
 import { AdminIamContext } from '@/context/admin-iam.context'
-import { t } from '@/i18n'
+import { useI18n } from '@/i18n'
 import { useAdminIam } from '@/hooks/use-admin-iam'
 import '../styles/admin.css'
 
@@ -10,6 +10,7 @@ import '../styles/admin.css'
  * Garde admin + un seul état IAM, menu vertical des sous-sections, contenu à droite.
  */
 export function AdminLayout() {
+  const { t } = useI18n()
   const { isAdmin, user, loading } = useAuth()
   const adminIam = useAdminIam()
   if (loading) {

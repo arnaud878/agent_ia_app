@@ -5,7 +5,7 @@ import type {
   SetStateAction,
 } from 'react'
 import { AssistantHtmlFrame } from '@/components/assistant/AssistantHtmlFrame'
-import { t } from '@/i18n'
+import { useI18n } from '@/i18n'
 import { formatDurationMs } from '@/lib/format-duration'
 import type { ChatMessage } from '@/types/chat'
 
@@ -36,6 +36,7 @@ export type ChatViewProps = {
 }
 
 export function ChatView(props: ChatViewProps) {
+  const { t } = useI18n()
   const {
     baseUrl,
     userId,

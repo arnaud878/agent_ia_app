@@ -1,4 +1,5 @@
 import type { LoginResponse, RoleRow, UserRow } from '@/auth/types'
+import { apiUrl, AuthPaths, IamPaths } from '@/config/api-routes'
 
 export type AuthPublicConfig = {
   publicRegister: boolean
@@ -32,7 +33,7 @@ async function parseJson<T>(res: Response): Promise<T> {
 }
 
 export async function apiAuthConfig(baseUrl: string): Promise<AuthPublicConfig> {
-  const res = await fetch(`${baseUrl}/auth/config`, {
+  const res = await fetch(apiUrl(baseUrl, AuthPaths.config), {
     headers: { Accept: 'application/json' },
   })
   return parseJson<AuthPublicConfig>(res)
@@ -43,7 +44,7 @@ export async function apiLogin(
   email: string,
   password: string,
 ): Promise<LoginResponse> {
-  const res = await fetch(`${baseUrl}/auth/login`, {
+  const res = await fetch(apiUrl(baseUrl, AuthPaths.login), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -56,7 +57,7 @@ export async function apiRegister(
   email: string,
   password: string,
 ): Promise<LoginResponse> {
-  const res = await fetch(`${baseUrl}/auth/register`, {
+  const res = await fetch(apiUrl(baseUrl, AuthPaths.register), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -68,7 +69,7 @@ export async function apiMe(
   baseUrl: string,
   token: string,
 ): Promise<{ id: string; email: string; roleSlug: string }> {
-  const res = await fetch(`${baseUrl}/auth/me`, {
+  const res = await fetch(apiUrl(baseUrl, AuthPaths.me), {
     headers: authHeaders(token),
   })
   return parseJson(res)
@@ -78,7 +79,7 @@ export async function apiListBiTables(
   baseUrl: string,
   token: string,
 ): Promise<string[]> {
-  const res = await fetch(`${baseUrl}/iam/bi-tables`, {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.biTables), {
     headers: authHeaders(token),
   })
   const j = await parseJson<{ tables: string[] }>(res)
@@ -89,7 +90,7 @@ export async function apiListRoles(
   baseUrl: string,
   token: string,
 ): Promise<RoleRow[]> {
-  const res = await fetch(`${baseUrl}/iam/roles`, {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.roles), {
     headers: authHeaders(token),
   })
   return parseJson<RoleRow[]>(res)
@@ -99,7 +100,7 @@ export async function apiListUsers(
   baseUrl: string,
   token: string,
 ): Promise<UserRow[]> {
-  const res = await fetch(`${baseUrl}/iam/users`, {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.users), {
     headers: authHeaders(token),
   })
   return parseJson<UserRow[]>(res)
@@ -110,7 +111,7 @@ export async function apiCreateUser(
   token: string,
   body: { email: string; password: string; roleId: string },
 ): Promise<{ id: string }> {
-  const res = await fetch(`${baseUrl}/iam/users`, {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.users), {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify(body),
@@ -124,7 +125,7 @@ export async function apiUpdateUser(
   userId: string,
   body: { roleId?: string; active?: boolean; password?: string },
 ): Promise<{ ok: boolean }> {
-  const res = await fetch(`${baseUrl}/iam/users/${userId}`, {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.user(userId)), {
     method: 'PUT',
     headers: authHeaders(token),
     body: JSON.stringify(body),
@@ -142,7 +143,7 @@ export async function apiCreateRole(
     description?: string
   },
 ) {
-  const res = await fetch(`${baseUrl}/iam/roles`, {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.roles), {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify(body),
@@ -156,13 +157,10 @@ export async function apiSetRoleTables(
   roleId: string,
   tableNames: string[],
 ) {
-  const res = await fetch(
-    `${baseUrl}/iam/roles/${roleId}/tables`,
-    {
-      method: 'PUT',
-      headers: authHeaders(token),
-      body: JSON.stringify({ tableNames }),
-    },
-  )
+  const res = await fetch(apiUrl(baseUrl, IamPaths.roleTables(roleId)), {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: JSON.stringify({ tableNames }),
+  })
   return parseJson<{ ok: boolean }>(res)
 }

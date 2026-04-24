@@ -8,7 +8,7 @@ import {
 import { useAuth } from '@/auth/AuthContext'
 import { getBiStreamPostUrl, buildBiStreamRequestInit } from '@/api/bi-webhook'
 import { getAppEnv, isEnvReady, resolveChatSessionOnly } from '@/config/env'
-import { t } from '@/i18n'
+import { useI18n } from '@/i18n'
 import {
   STICK_TO_BOTTOM_PX,
   STREAM_LOG_KEEP,
@@ -26,6 +26,7 @@ function appendStreamLog(prev: string[], line: string): string[] {
 }
 
 export function useBiChat() {
+  const { t } = useI18n()
   const { token: accessToken, user: authUser, authConfig, configLoaded } =
     useAuth()
   const { baseUrl, userId: envUserId, apiConfig } = getAppEnv()
@@ -177,7 +178,7 @@ export function useBiChat() {
           {
             id: crypto.randomUUID(),
             role: 'assistant',
-            text: 'Réponse sans corps (stream).',
+            text: t('chat.assistant.emptyBody'),
             durationMs,
           },
         ])
@@ -212,7 +213,7 @@ export function useBiChat() {
             id: crypto.randomUUID(),
             role: 'assistant',
             html: out || undefined,
-            text: !out ? 'Réponse sans champ output.' : undefined,
+            text: !out ? t('chat.assistant.noOutputField') : undefined,
             durationMs,
           },
         ])
@@ -222,7 +223,7 @@ export function useBiChat() {
           {
             id: crypto.randomUUID(),
             role: 'assistant',
-            text: 'Le flux s’est arrêté sans réponse complète.',
+            text: t('chat.assistant.incomplete'),
             durationMs,
           },
         ])
@@ -251,6 +252,7 @@ export function useBiChat() {
     draft,
     loading,
     sessionOnly,
+    t,
     userId,
   ])
 

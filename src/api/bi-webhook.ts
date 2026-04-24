@@ -1,14 +1,15 @@
-import {
-  N8N_WEBHOOK_PATH_SEGMENT,
-  WEBHOOK_STREAM_SUFFIX,
-} from '@/config/constants'
+import { apiUrl, getBiWebhookStreamPath } from '@/config/api-routes'
+import { N8N_WEBHOOK_PATH_SEGMENT, WEBHOOK_STREAM_SUFFIX } from '@/config/constants'
 import type { AppEnv } from '@/config/env'
 
 /**
  * URL POST NDJSON (streaming), alignée sur le contrôleur Nest `webhook` + path n8n.
  */
 export function getBiStreamPostUrl(baseUrl: string): string {
-  return `${baseUrl}/webhook/${N8N_WEBHOOK_PATH_SEGMENT}/${WEBHOOK_STREAM_SUFFIX}`
+  return apiUrl(
+    baseUrl,
+    getBiWebhookStreamPath(N8N_WEBHOOK_PATH_SEGMENT, WEBHOOK_STREAM_SUFFIX),
+  )
 }
 
 export type BiChatRequestBody = {

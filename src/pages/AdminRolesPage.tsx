@@ -1,9 +1,10 @@
-import { t } from '@/i18n'
+import { useI18n } from '@/i18n'
 import { useAdminIamContext } from '@/hooks/useAdminIamContext'
 import type { RoleRow } from '@/auth/types'
 import '../styles/admin.css'
 
 export function AdminRolesPage() {
+  const { t } = useI18n()
   const a = useAdminIamContext()
 
   return (

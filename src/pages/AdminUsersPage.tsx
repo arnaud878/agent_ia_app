@@ -4,10 +4,11 @@ import { useAuth } from '@/auth/AuthContext'
 import { useAdminIamContext } from '@/hooks/useAdminIamContext'
 import { apiUpdateUser } from '@/api/iam-client'
 import type { UserRow } from '@/auth/types'
-import { t } from '@/i18n'
+import { useI18n } from '@/i18n'
 import '../styles/admin.css'
 
 export function AdminUsersPage() {
+  const { t } = useI18n()
   const a = useAdminIamContext()
   const { user: sessionUser } = useAuth()
   const baseUrl = getAppEnv().baseUrl

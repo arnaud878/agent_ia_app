@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
-import { t } from '@/i18n'
+import { useI18n } from '@/i18n'
 import '../styles/admin.css'
 
 export function LoginPage() {
+  const { t } = useI18n()
   const { login, user, authConfig, configLoaded } = useAuth()
   const nav = useNavigate()
   const [email, setEmail] = useState('')
