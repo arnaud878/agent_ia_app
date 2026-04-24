@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
 import { AdminLayout } from '@/context/AdminLayout'
-import { resolveChatSessionOnly } from '@/config/env'
 import { PageWait } from '@/components/feedback/PageWait'
 import { Layout } from '@/components/Layout'
 import { AdminRolesPage } from '@/pages/AdminRolesPage'
@@ -10,17 +9,13 @@ import { ChatPage } from '@/pages/ChatPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 
-/** Chat : connexion obligatoire si le serveur impose le JWT (WEBHOOK_JWT_ONLY) ou Vite. */
+/** Chat : compte requis (pas d’UI chat pour les invités). */
 function ChatRoute() {
-  const { user, loading, authConfig, configLoaded } = useAuth()
-  const needLogin = resolveChatSessionOnly(
-    authConfig?.webhookJwtOnly,
-    configLoaded,
-  )
+  const { user, loading, configLoaded } = useAuth()
   if (loading || !configLoaded) {
     return <PageWait />
   }
-  if (needLogin && !user) {
+  if (!user) {
     return <Navigate to="/login" replace state={{ from: '/' }} />
   }
   return <ChatPage />

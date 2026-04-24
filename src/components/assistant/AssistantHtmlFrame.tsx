@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+/** Fond du document dans l’iframe (évite le blanc par défaut des navigateurs sur html/body). */
+const IFRAME_DOC_BG = '#0f1117'
+
 type Props = {
   html: string
 }
@@ -13,13 +16,29 @@ export function AssistantHtmlFrame({ html }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [heightPx, setHeightPx] = useState(160)
 
+  const applyDarkDocumentSurface = useCallback(() => {
+    const el = iframeRef.current
+    const doc = el?.contentDocument
+    if (!doc) {
+      return
+    }
+    doc.documentElement.style.background = IFRAME_DOC_BG
+    doc.documentElement.style.colorScheme = 'dark'
+    if (doc.body) {
+      doc.body.style.background = IFRAME_DOC_BG
+    }
+  }, [])
+
   const fitHeight = useCallback(() => {
     const el = iframeRef.current
-    const body = el?.contentDocument?.body
+    const doc = el?.contentDocument
+    if (doc) {
+      applyDarkDocumentSurface()
+    }
+    const body = doc?.body
     if (!body) {
       return
     }
-    const doc = el!.contentDocument!
     const h = Math.max(
       body.scrollHeight,
       doc.documentElement?.scrollHeight ?? 0,
@@ -30,7 +49,7 @@ export function AssistantHtmlFrame({ html }: Props) {
       const cap = Math.min(3600, Math.max(160, vh * 0.88))
       setHeightPx(Math.min(h + 24, cap))
     }
-  }, [])
+  }, [applyDarkDocumentSurface])
 
   useEffect(() => {
     const run = () => {
@@ -60,7 +79,7 @@ export function AssistantHtmlFrame({ html }: Props) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <base target="_blank" rel="noopener noreferrer" />
   <style>
-    html, body { margin: 0; padding: 0; background: transparent; height: 100%; }
+    html, body { margin: 0; padding: 0; background: ${IFRAME_DOC_BG}; color-scheme: dark; min-height: 100%; }
     body { box-sizing: border-box; padding: 0.25rem 0.15rem; overflow: auto; }
   </style>
 </head>
@@ -80,7 +99,8 @@ export function AssistantHtmlFrame({ html }: Props) {
         height: heightPx,
         border: 0,
         display: 'block',
-        background: 'transparent',
+        background: IFRAME_DOC_BG,
+        colorScheme: 'dark',
       }}
       sandbox="allow-scripts allow-same-origin allow-popups"
     />
