@@ -5,6 +5,8 @@ import type {
   SetStateAction,
 } from 'react'
 import { AssistantHtmlFrame } from '@/components/assistant/AssistantHtmlFrame'
+import { ChatConversationsPanel } from '@/components/chat/ChatConversationsPanel'
+import type { ConversationRow } from '@/api/chat-conversations'
 import { useI18n } from '@/i18n'
 import { formatDurationMs } from '@/lib/format-duration'
 import type { ChatMessage } from '@/types/chat'
@@ -16,6 +18,8 @@ export type ChatViewProps = {
   /** Si true, pas d’accès par clé .env (config serveur VITE/WEBHOOK_JWT_ONLY) */
   sessionOnly: boolean
   chatId: string
+  /** Clé courte affichée (serveur) ; si vide, repli sur le début d’UUID */
+  displayKey: string
   messages: ChatMessage[]
   draft: string
   setDraft: Dispatch<SetStateAction<string>>
@@ -33,6 +37,12 @@ export type ChatViewProps = {
   send: () => void | Promise<void>
   onThreadScroll: () => void
   onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void
+  showConversationList: boolean
+  conversations: ConversationRow[] | undefined
+  conversationsLoading: boolean
+  conversationsError: boolean
+  selectConversation: (id: string) => void
+  deleteConversation: (id: string) => void
 }
 
 export function ChatView(props: ChatViewProps) {
@@ -43,6 +53,7 @@ export function ChatView(props: ChatViewProps) {
     configOk,
     sessionOnly,
     chatId,
+    displayKey,
     messages,
     draft,
     setDraft,
@@ -60,24 +71,53 @@ export function ChatView(props: ChatViewProps) {
     send,
     onThreadScroll,
     onKeyDown,
+    showConversationList,
+    conversations,
+    conversationsLoading,
+    conversationsError,
+    selectConversation,
+    deleteConversation,
   } = props
 
   return (
-    <div className="chat-app">
-      <header className="chat-header">
+    <div
+      className={
+        showConversationList
+          ? 'chat-app-layout chat-app-layout--with-conv'
+          : 'chat-app-layout'
+      }
+    >
+      {showConversationList && (
+        <ChatConversationsPanel
+          conversations={conversations}
+          loading={conversationsLoading}
+          error={conversationsError}
+          activeId={chatId}
+          onSelect={selectConversation}
+          onDelete={deleteConversation}
+        />
+      )}
+      <div className="chat-app">
+        <header className="chat-header">
         <div className="chat-brand">
           <h1>{t('chat.title')}</h1>
           <span className="chat-sub">{t('chat.backend')}</span>
         </div>
         <div className="chat-actions">
           <span className="chat-meta" title={t('chat.sessionTitle')}>
-            {t('chat.sessionPrefix')} · {chatId.slice(0, 8)}…
+            {t('chat.displayKey')} ·{' '}
+            {displayKey.trim() || `${chatId.slice(0, 8)}…`}
           </span>
           <button type="button" className="btn ghost" onClick={newConversation}>
             {t('chat.newConversation')}
           </button>
         </div>
       </header>
+      {!showConversationList && (
+        <p className="chat-header-hint" role="note">
+          {t('chat.conversations.loginHint')}
+        </p>
+      )}
 
       {!configOk && (
         <div className="config-banner" role="status">
@@ -117,8 +157,17 @@ export function ChatView(props: ChatViewProps) {
               {msg.role === 'assistant' && (
                 <div className="bubble-label">{t('chat.role.assistant')}</div>
               )}
-              {msg.text && <div className="bubble-text">{msg.text}</div>}
-              {msg.html && <AssistantHtmlFrame html={msg.html} />}
+              {msg.role === 'user' && msg.text && (
+                <div className="bubble-text">{msg.text}</div>
+              )}
+              {msg.role === 'assistant' &&
+                (msg.html ? (
+                  <AssistantHtmlFrame html={msg.html} />
+                ) : (
+                  msg.text && (
+                    <div className="bubble-text">{msg.text}</div>
+                  )
+                ))}
               {msg.durationMs != null && (
                 <div
                   className="bubble-timing"
@@ -204,6 +253,7 @@ export function ChatView(props: ChatViewProps) {
       {showRaw && lastRaw !== null && (
         <pre className="raw-json">{JSON.stringify(lastRaw, null, 2)}</pre>
       )}
+      </div>
     </div>
   )
 }

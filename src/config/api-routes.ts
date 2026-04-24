@@ -23,6 +23,9 @@ export const IamPaths = {
   users: '/iam/users',
   roleTables: (roleId: string) => `/iam/roles/${roleId}/tables` as const,
   user: (userId: string) => `/iam/users/${userId}` as const,
+  conversations: '/iam/conversations',
+  conversation: (id: string) => `/iam/conversations/${id}` as const,
+  conversationMessages: (id: string) => `/iam/conversations/${id}/messages` as const,
 } as const
 
 /**

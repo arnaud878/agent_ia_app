@@ -1,4 +1,5 @@
 import type { LoginResponse, RoleRow, UserRow } from '@/auth/types'
+import { parseJson } from '@/api/parse'
 import { apiUrl, AuthPaths, IamPaths } from '@/config/api-routes'
 
 export type AuthPublicConfig = {
@@ -11,25 +12,6 @@ function authHeaders(token: string): HeadersInit {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
   }
-}
-
-async function parseJson<T>(res: Response): Promise<T> {
-  const text = await res.text()
-  if (!res.ok) {
-    let msg = `HTTP ${res.status}`
-    try {
-      const j = text ? (JSON.parse(text) as { message?: string | string[] }) : null
-      if (j?.message) {
-        msg = Array.isArray(j.message) ? (j.message[0] ?? msg) : j.message
-      }
-    } catch {
-      if (text) {
-        msg = text.slice(0, 300)
-      }
-    }
-    throw new Error(msg)
-  }
-  return (text ? JSON.parse(text) : {}) as T
 }
 
 export async function apiAuthConfig(baseUrl: string): Promise<AuthPublicConfig> {
