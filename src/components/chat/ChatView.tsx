@@ -108,7 +108,6 @@ export function ChatView(props: ChatViewProps) {
         <header className="chat-header">
         <div className="chat-brand">
           <h1>{t('chat.title')}</h1>
-          <span className="chat-sub">{t('chat.backend')}</span>
         </div>
         <div className="chat-actions">
           <span className="chat-meta" title={t('chat.sessionTitle')}>
@@ -234,9 +233,8 @@ export function ChatView(props: ChatViewProps) {
           onKeyDown={onKeyDown}
           disabled={!configOk || loading}
         />
-        <div className="chat-composer-side">
+        <div className="chat-composer-actions">
           <label className="chat-mode-field">
-            <span className="chat-mode-label">{t('chat.responseMode')}</span>
             <select
               className="chat-mode-select"
               value={responseMode}
@@ -255,7 +253,7 @@ export function ChatView(props: ChatViewProps) {
           </label>
           <button
             type="button"
-            className="btn send"
+            className="btn send chat-composer-send"
             onClick={() => void send()}
             disabled={!configOk || loading || !draft.trim()}
           >
