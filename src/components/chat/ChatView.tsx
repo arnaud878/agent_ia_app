@@ -87,13 +87,7 @@ export function ChatView(props: ChatViewProps) {
   } = props
 
   return (
-    <div
-      className={
-        showConversationList
-          ? 'chat-app-layout chat-app-layout--with-conv'
-          : 'chat-app-layout'
-      }
-    >
+    <div className="chat-app-layout">
       {showConversationList && (
         <ChatConversationsPanel
           conversations={conversations}
@@ -222,7 +216,7 @@ export function ChatView(props: ChatViewProps) {
       <footer className="chat-composer">
         <textarea
           className="chat-input"
-          rows={2}
+          rows={1}
           placeholder={
             configOk
               ? t('chat.placeholderReady')

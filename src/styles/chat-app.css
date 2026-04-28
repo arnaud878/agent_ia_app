@@ -4,16 +4,12 @@
   flex: 1 1 0;
   min-height: 0;
   width: 100%;
-  max-width: 64rem;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   gap: 0.75rem;
-  padding: 0 0.25rem;
+  padding: 0;
   box-sizing: border-box;
   align-items: stretch;
-}
-
-.chat-app-layout--with-conv {
-  max-width: 72rem;
 }
 
 .chat-conversations {
@@ -152,14 +148,15 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 0 1rem;
+  gap: 0.5rem;
+  padding: 0.35rem 0 0.5rem;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 .chat-brand h1 {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
+  line-height: 1.25;
   margin: 0;
   color: var(--text-h);
 }
@@ -181,7 +178,7 @@
 .chat-meta {
   font-size: 0.75rem;
   color: var(--text);
-  max-width: 12rem;
+  max-width: min(100%, 28rem);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -245,7 +242,7 @@
 .chat-bubble {
   border-radius: 12px;
   padding: 0.65rem 0.9rem;
-  max-width: min(100%, 42rem);
+  max-width: min(100%, 92%);
   align-self: flex-start;
 }
 
@@ -390,10 +387,10 @@ html[data-theme='dark'] .stream-log {
 
 .chat-composer {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.45rem;
   align-items: stretch;
-  padding: 0.9rem 0.35rem 0.45rem;
-  margin-top: 0.15rem;
+  padding: 0.5rem 0.2rem 0.3rem;
+  margin-top: 0.05rem;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -403,10 +400,10 @@ html[data-theme='dark'] .stream-log {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.35rem;
   flex-shrink: 0;
-  min-width: 7.5rem;
-  padding: 0.2rem 0.15rem;
+  min-width: 7rem;
+  padding: 0.1rem 0.1rem;
   box-sizing: border-box;
 }
 
@@ -427,12 +424,12 @@ html[data-theme='dark'] .stream-log {
 
 .chat-mode-select {
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-h);
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.5rem 1.25rem 0.5rem 0.5rem;
+  padding: 0.38rem 1.1rem 0.38rem 0.45rem;
   cursor: pointer;
   width: 100%;
   min-width: 0;
@@ -461,15 +458,15 @@ html[data-theme='dark'] .stream-log {
 .chat-input {
   flex: 1;
   font: inherit;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  padding: 0.55rem 0.75rem;
-  border-radius: 10px;
+  font-size: 0.88rem;
+  line-height: 1.38;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text-h);
   resize: none;
-  min-height: 2.5rem;
+  min-height: 2.15rem;
   max-height: 8rem;
   box-sizing: border-box;
 }
@@ -593,14 +590,20 @@ html[data-theme='dark'] .stream-log {
   padding: 0.6rem 1rem;
 }
 
+.chat-composer .btn.send {
+  min-width: 4.5rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+}
+
 .chat-footer-tech {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem 0.75rem;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text);
-  padding: 0.35rem 0 0;
+  padding: 0.2rem 0 0;
   flex-shrink: 0;
 }
 
