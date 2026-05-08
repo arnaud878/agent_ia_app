@@ -146,3 +146,135 @@ export async function apiSetRoleTables(
   })
   return parseJson<{ ok: boolean }>(res)
 }
+
+export type TurnRow = {
+  userMsgId: string
+  userText: string | null
+  userCreatedAt: string
+  aiMsgId: string | null
+  aiText: string | null
+  aiHtml: string | null
+  durationMs: number | null
+  requeteSQL: string | null
+  resultatSQL: string | null
+  aiCreatedAt: string | null
+  conversationId: string
+  displayKey: string
+  title: string | null
+  userEmail: string
+}
+
+export async function apiAdminListTurns(
+  baseUrl: string,
+  token: string,
+  params: { page?: number; limit?: number; search?: string } = {},
+): Promise<PaginatedResult<TurnRow>> {
+  const q = new URLSearchParams()
+  if (params.page) q.set('page', String(params.page))
+  if (params.limit) q.set('limit', String(params.limit))
+  if (params.search) q.set('search', params.search)
+  const query = q.toString()
+  const url = apiUrl(baseUrl, IamPaths.adminTurns) + (query ? `?${query}` : '')
+  const res = await fetch(url, { headers: authHeaders(token) })
+  return parseJson<PaginatedResult<TurnRow>>(res)
+}
+
+export type AdminConversationRow = {
+  id: string
+  displayKey: string
+  title: string | null
+  createdAt: string
+  updatedAt: string
+  userEmail: string
+  userId: string
+  messageCount: number
+}
+
+export type PaginatedResult<T> = {
+  rows: T[]
+  total: number
+  page: number
+  limit: number
+}
+
+export type AdminMessageRow = {
+  id: string
+  role: 'user' | 'assistant'
+  text: string | null
+  html: string | null
+  durationMs: number | null
+  requeteSQL: string | null
+  resultatSQL: string | null
+  createdAt: string
+  conversationId: string
+  displayKey: string
+  userEmail: string
+}
+
+export async function apiAdminListConversations(
+  baseUrl: string,
+  token: string,
+  params: { page?: number; limit?: number; search?: string; userId?: string } = {},
+): Promise<PaginatedResult<AdminConversationRow>> {
+  const q = new URLSearchParams()
+  if (params.page) q.set('page', String(params.page))
+  if (params.limit) q.set('limit', String(params.limit))
+  if (params.search) q.set('search', params.search)
+  if (params.userId) q.set('userId', params.userId)
+  const query = q.toString()
+  const url = apiUrl(baseUrl, IamPaths.adminConversations) + (query ? `?${query}` : '')
+  const res = await fetch(url, { headers: authHeaders(token) })
+  return parseJson<PaginatedResult<AdminConversationRow>>(res)
+}
+
+export async function apiAdminGetConversationMessages(
+  baseUrl: string,
+  token: string,
+  conversationId: string,
+): Promise<AdminMessageRow[]> {
+  const res = await fetch(
+    apiUrl(baseUrl, IamPaths.adminConversationMessages(conversationId)),
+    { headers: authHeaders(token) },
+  )
+  return parseJson<AdminMessageRow[]>(res)
+}
+
+export async function apiAdminListMessages(
+  baseUrl: string,
+  token: string,
+  params: { page?: number; limit?: number; search?: string; role?: string } = {},
+): Promise<PaginatedResult<AdminMessageRow>> {
+  const q = new URLSearchParams()
+  if (params.page) q.set('page', String(params.page))
+  if (params.limit) q.set('limit', String(params.limit))
+  if (params.search) q.set('search', params.search)
+  if (params.role) q.set('role', params.role)
+  const query = q.toString()
+  const url = apiUrl(baseUrl, IamPaths.adminMessages) + (query ? `?${query}` : '')
+  const res = await fetch(url, { headers: authHeaders(token) })
+  return parseJson<PaginatedResult<AdminMessageRow>>(res)
+}
+
+export async function apiAdminDeleteConversation(
+  baseUrl: string,
+  token: string,
+  conversationId: string,
+): Promise<void> {
+  const res = await fetch(
+    apiUrl(baseUrl, IamPaths.adminConversation(conversationId)),
+    { method: 'DELETE', headers: authHeaders(token) },
+  )
+  if (!res.ok) {
+    const text = await res.text()
+    let msg = `HTTP ${res.status}`
+    try {
+      const j = text ? (JSON.parse(text) as { message?: string | string[] }) : null
+      if (j?.message) {
+        msg = Array.isArray(j.message) ? (j.message[0] ?? msg) : j.message
+      }
+    } catch {
+      if (text) msg = text.slice(0, 300)
+    }
+    throw new Error(msg)
+  }
+}

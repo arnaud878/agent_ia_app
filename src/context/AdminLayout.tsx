@@ -46,6 +46,15 @@ export function AdminLayout() {
             >
               {t('nav.adminRoles')}
             </NavLink>
+            <NavLink
+              to="/admin/history"
+              className={({ isActive }) =>
+                (isActive ? 'admin-nav-link is-active' : 'admin-nav-link') as
+                  string
+              }
+            >
+              {t('nav.adminHistory')}
+            </NavLink>
           </nav>
         </aside>
         <main className="admin-main">

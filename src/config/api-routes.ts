@@ -26,6 +26,11 @@ export const IamPaths = {
   conversations: '/iam/conversations',
   conversation: (id: string) => `/iam/conversations/${id}` as const,
   conversationMessages: (id: string) => `/iam/conversations/${id}/messages` as const,
+  adminTurns: '/iam/admin/turns' as const,
+  adminConversations: '/iam/admin/conversations' as const,
+  adminMessages: '/iam/admin/messages' as const,
+  adminConversation: (id: string) => `/iam/admin/conversations/${id}` as const,
+  adminConversationMessages: (id: string) => `/iam/admin/conversations/${id}/messages` as const,
 } as const
 
 /**

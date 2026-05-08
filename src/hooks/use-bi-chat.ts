@@ -498,6 +498,14 @@ export function useBiChat() {
       if (doneEvent) {
         const out =
           typeof doneEvent.output === 'string' ? doneEvent.output : null
+        const requeteSQL =
+          typeof doneEvent.requeteSQL === 'string'
+            ? doneEvent.requeteSQL
+            : null
+        const resultatSQL =
+          typeof doneEvent.resultatSQL === 'string'
+            ? doneEvent.resultatSQL
+            : null
         const noField = t('chat.assistant.noOutputField')
         setMessages((m) => [
           ...m,
@@ -510,9 +518,9 @@ export function useBiChat() {
           },
         ])
         if (out) {
-          postUi({ role: 'assistant', html: out, durationMs })
+          postUi({ role: 'assistant', html: out, durationMs, requeteSQL, resultatSQL })
         } else {
-          postUi({ role: 'assistant', text: noField, durationMs })
+          postUi({ role: 'assistant', text: noField, durationMs, requeteSQL, resultatSQL })
         }
       } else {
         const inc = t('chat.assistant.incomplete')

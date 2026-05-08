@@ -67,6 +67,8 @@ export type AppendUiMessageBody = {
   text?: string | null
   html?: string | null
   durationMs?: number | null
+  requeteSQL?: string | null
+  resultatSQL?: string | null
 }
 
 export async function apiPostConversationMessage(
