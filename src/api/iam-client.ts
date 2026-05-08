@@ -105,6 +105,31 @@ export async function apiSetBiConnection(
   return parseJson<{ ok: boolean }>(res)
 }
 
+export type LlmProvider = 'gemini' | 'gpt' | 'claude'
+
+export async function apiGetLlmSettings(
+  baseUrl: string,
+  token: string,
+): Promise<{ provider: LlmProvider; model: string; hasApiKey: boolean }> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.llmSettings), {
+    headers: authHeaders(token),
+  })
+  return parseJson<{ provider: LlmProvider; model: string; hasApiKey: boolean }>(res)
+}
+
+export async function apiSetLlmSettings(
+  baseUrl: string,
+  token: string,
+  body: { provider: LlmProvider; model: string; apiKey?: string },
+): Promise<{ ok: boolean }> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.llmSettings), {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: JSON.stringify(body),
+  })
+  return parseJson<{ ok: boolean }>(res)
+}
+
 export async function apiListRoles(
   baseUrl: string,
   token: string,

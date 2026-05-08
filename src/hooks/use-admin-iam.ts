@@ -5,15 +5,20 @@ import {
   apiCreateRole,
   apiCreateUser,
   apiGetBiConnection,
+  apiGetLlmSettings,
   apiListBiTables,
   apiListRoles,
   apiListUsers,
   apiSetBiConnection,
   apiSetBiTables,
+  apiSetLlmSettings,
   apiSetRoleTables,
+  type LlmProvider,
 } from '@/api/iam-client'
 import type { RoleRow, UserRow } from '@/auth/types'
 import { useI18n } from '@/i18n'
+
+const STORED_API_KEY_MASK = '........'
 
 /**
  * État partagé entre les écrans d’administration (utilisateurs / rôles).
@@ -44,6 +49,10 @@ export function useAdminIam() {
   )
   const [biTablesDraft, setBiTablesDraft] = useState('')
   const [biConnectionDraft, setBiConnectionDraft] = useState('')
+  const [llmProvider, setLlmProvider] = useState<LlmProvider>('gemini')
+  const [llmModel, setLlmModel] = useState('gemini-2.5-flash')
+  const [llmApiKey, setLlmApiKey] = useState('')
+  const [llmHasApiKey, setLlmHasApiKey] = useState(false)
 
   const load = useCallback(async () => {
     if (!token) {
@@ -56,10 +65,17 @@ export function useAdminIam() {
       apiListRoles(baseUrl, token),
       apiListUsers(baseUrl, token),
     ])
-    const conn = await apiGetBiConnection(baseUrl, token)
+    const [conn, llm] = await Promise.all([
+      apiGetBiConnection(baseUrl, token),
+      apiGetLlmSettings(baseUrl, token),
+    ])
     setBiTables(bi)
     setBiTablesDraft(bi.join('\n'))
     setBiConnectionDraft(conn.connectionString || '')
+    setLlmProvider(llm.provider)
+    setLlmModel(llm.model)
+    setLlmHasApiKey(llm.hasApiKey)
+    setLlmApiKey(llm.hasApiKey ? STORED_API_KEY_MASK : '')
     setRoles(r)
     setUsers(u)
   }, [baseUrl, token])
@@ -211,6 +227,30 @@ export function useAdminIam() {
     })()
   }
 
+  const onSaveLlmSettings = () => {
+    if (!token) {
+      return
+    }
+    setError(null)
+    setSuccess(null)
+    void (async () => {
+      try {
+        await apiSetLlmSettings(baseUrl, token, {
+          provider: llmProvider,
+          model: llmModel.trim(),
+          apiKey:
+            llmApiKey.trim().length > 0 && llmApiKey !== STORED_API_KEY_MASK
+              ? llmApiKey.trim()
+              : undefined,
+        })
+        await load()
+        setSuccess(t('admin.success.llmUpdated'))
+      } catch (e) {
+        setError(e instanceof Error ? e.message : t('common.error'))
+      }
+    })()
+  }
+
   return {
     token,
     error,
@@ -242,12 +282,20 @@ export function useAdminIam() {
     setBiTablesDraft,
     biConnectionDraft,
     setBiConnectionDraft,
+    llmProvider,
+    setLlmProvider,
+    llmModel,
+    setLlmModel,
+    llmApiKey,
+    setLlmApiKey,
+    llmHasApiKey,
     onCreateUser,
     onCreateRole,
     openTableEditor,
     onSaveRoleTables,
     onSaveBiTables,
     onSaveBiConnection,
+    onSaveLlmSettings,
     load,
   }
 }

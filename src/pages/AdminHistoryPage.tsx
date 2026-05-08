@@ -57,7 +57,9 @@ export function AdminHistoryPage() {
 
   const onSearchChange = (val: string) => {
     setSearch(val)
-    clearTimeout(searchTimer.current)
+    if (searchTimer.current !== null) {
+      clearTimeout(searchTimer.current)
+    }
     searchTimer.current = setTimeout(() => setPage(1), 400)
   }
 

@@ -15,6 +15,7 @@ const fr = {
   'nav.adminUsers': 'Utilisateurs',
   'nav.adminRoles': 'Rôles',
   'nav.adminBiBase': 'Base BI',
+  'nav.adminLlm': 'Configuration LLM',
   'nav.locale': 'Langue',
   'nav.localeFr': 'FR',
   'nav.localeEn': 'EN',
@@ -133,6 +134,7 @@ const fr = {
   'admin.success.roleTablesUpdated': 'Tables du rôle mises à jour.',
   'admin.success.biTablesUpdated': 'Tables BI mises à jour.',
   'admin.success.biConnectionUpdated': 'Connexion base BI mise à jour.',
+  'admin.success.llmUpdated': 'Paramètres LLM mis à jour.',
   'chat.error.session':
     'Le chat est limité aux comptes connectés. Utilisez « Connexion » (ou « Créer un compte » si l’inscription est activée).',
   'chat.error.config':
@@ -151,6 +153,18 @@ const fr = {
   'admin.biConnectionHint':
     'Renseignez la connexion PostgreSQL de la base BI (format postgres://...) ou laissez vide pour utiliser la connexion système.',
   'admin.biConnectionSave': 'Enregistrer la connexion',
+  'admin.titleLlm': 'Configuration LLM',
+  'admin.introLlm':
+    'Choisissez le provider IA, le modèle et la clé API utilisés par l’assistant.',
+  'admin.llmHint':
+    'Paramétrez ici le provider LLM, le modèle et la clé API utilisée pour les réponses IA.',
+  'admin.llmProvider': 'Provider LLM',
+  'admin.llmModel': 'Modèle',
+  'admin.llmApiKey': 'API key',
+  'admin.llmApiKeyStored': 'déjà configurée',
+  'admin.llmApiKeyPlaceholder':
+    'Laisser vide pour conserver la clé actuelle',
+  'admin.llmSave': 'Enregistrer les paramètres LLM',
   'admin.history': 'Conversations',
   'admin.thUser': 'Utilisateur',
   'admin.thDisplayKey': 'Clé',
@@ -197,6 +211,7 @@ const en: Record<keyof typeof fr, string> = {
   'nav.adminUsers': 'Users',
   'nav.adminRoles': 'Roles',
   'nav.adminBiBase': 'BI Base',
+  'nav.adminLlm': 'LLM Configuration',
   'nav.locale': 'Language',
   'nav.localeFr': 'FR',
   'nav.localeEn': 'EN',
@@ -315,6 +330,7 @@ const en: Record<keyof typeof fr, string> = {
   'admin.success.roleTablesUpdated': 'Role tables updated.',
   'admin.success.biTablesUpdated': 'BI tables updated.',
   'admin.success.biConnectionUpdated': 'BI connection updated.',
+  'admin.success.llmUpdated': 'LLM settings updated.',
   'chat.error.session':
     'The chat is limited to signed-in accounts. Use “Log in” (or “Sign up” if enabled).',
   'chat.error.config':
@@ -333,6 +349,17 @@ const en: Record<keyof typeof fr, string> = {
   'admin.biConnectionHint':
     'Provide PostgreSQL connection string for BI database (postgres://...), or leave empty to use system connection.',
   'admin.biConnectionSave': 'Save connection',
+  'admin.titleLlm': 'LLM Configuration',
+  'admin.introLlm':
+    'Choose the AI provider, model, and API key used by the assistant.',
+  'admin.llmHint':
+    'Configure the LLM provider, model and API key used by the AI assistant.',
+  'admin.llmProvider': 'LLM provider',
+  'admin.llmModel': 'Model',
+  'admin.llmApiKey': 'API key',
+  'admin.llmApiKeyStored': 'already configured',
+  'admin.llmApiKeyPlaceholder': 'Leave empty to keep current key',
+  'admin.llmSave': 'Save LLM settings',
   'admin.history': 'Conversations',
   'admin.thUser': 'User',
   'admin.thDisplayKey': 'Key',

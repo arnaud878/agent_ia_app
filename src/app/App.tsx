@@ -5,6 +5,7 @@ import { PageWait } from '@/components/feedback/PageWait'
 import { Layout } from '@/components/Layout'
 import { AdminBiTablesPage } from '@/pages/AdminBiTablesPage'
 import { AdminHistoryPage } from '@/pages/AdminHistoryPage'
+import { AdminLlmPage } from '@/pages/AdminLlmPage'
 import { AdminRolesPage } from '@/pages/AdminRolesPage'
 import { AdminUsersPage } from '@/pages/AdminUsersPage'
 import { ChatPage } from '@/pages/ChatPage'
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="roles" element={<AdminRolesPage />} />
           <Route path="bi-base" element={<AdminBiTablesPage />} />
+          <Route path="llm" element={<AdminLlmPage />} />
           <Route path="history" element={<AdminHistoryPage />} />
         </Route>
       </Route>

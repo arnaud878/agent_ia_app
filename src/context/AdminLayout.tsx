@@ -64,6 +64,15 @@ export function AdminLayout() {
             >
               {t('nav.adminBiBase')}
             </NavLink>
+            <NavLink
+              to="/admin/llm"
+              className={({ isActive }) =>
+                (isActive ? 'admin-nav-link is-active' : 'admin-nav-link') as
+                  string
+              }
+            >
+              {t('nav.adminLlm')}
+            </NavLink>
           </nav>
         </aside>
         <main className="admin-main">
