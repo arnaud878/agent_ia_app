@@ -4,9 +4,11 @@ import { useAuth } from '@/auth/AuthContext'
 import {
   apiCreateRole,
   apiCreateUser,
+  apiGetBiConnection,
   apiListBiTables,
   apiListRoles,
   apiListUsers,
+  apiSetBiConnection,
   apiSetBiTables,
   apiSetRoleTables,
 } from '@/api/iam-client'
@@ -41,6 +43,7 @@ export function useAdminIam() {
     {},
   )
   const [biTablesDraft, setBiTablesDraft] = useState('')
+  const [biConnectionDraft, setBiConnectionDraft] = useState('')
 
   const load = useCallback(async () => {
     if (!token) {
@@ -53,8 +56,10 @@ export function useAdminIam() {
       apiListRoles(baseUrl, token),
       apiListUsers(baseUrl, token),
     ])
+    const conn = await apiGetBiConnection(baseUrl, token)
     setBiTables(bi)
     setBiTablesDraft(bi.join('\n'))
+    setBiConnectionDraft(conn.connectionString || '')
     setRoles(r)
     setUsers(u)
   }, [baseUrl, token])
@@ -189,6 +194,23 @@ export function useAdminIam() {
     })()
   }
 
+  const onSaveBiConnection = () => {
+    if (!token) {
+      return
+    }
+    setError(null)
+    setSuccess(null)
+    void (async () => {
+      try {
+        await apiSetBiConnection(baseUrl, token, biConnectionDraft)
+        await load()
+        setSuccess(t('admin.success.biConnectionUpdated'))
+      } catch (e) {
+        setError(e instanceof Error ? e.message : t('common.error'))
+      }
+    })()
+  }
+
   return {
     token,
     error,
@@ -218,11 +240,14 @@ export function useAdminIam() {
     setTableSelection,
     biTablesDraft,
     setBiTablesDraft,
+    biConnectionDraft,
+    setBiConnectionDraft,
     onCreateUser,
     onCreateRole,
     openTableEditor,
     onSaveRoleTables,
     onSaveBiTables,
+    onSaveBiConnection,
     load,
   }
 }

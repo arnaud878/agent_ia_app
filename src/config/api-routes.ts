@@ -19,6 +19,7 @@ export const AuthPaths = {
 
 export const IamPaths = {
   biTables: '/iam/bi-tables',
+  biConnection: '/iam/bi-connection',
   roles: '/iam/roles',
   users: '/iam/users',
   roleTables: (roleId: string) => `/iam/roles/${roleId}/tables` as const,

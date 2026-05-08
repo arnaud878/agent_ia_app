@@ -56,13 +56,13 @@ export function AdminLayout() {
               {t('nav.adminHistory')}
             </NavLink>
             <NavLink
-              to="/admin/bi-tables"
+              to="/admin/bi-base"
               className={({ isActive }) =>
                 (isActive ? 'admin-nav-link is-active' : 'admin-nav-link') as
                   string
               }
             >
-              {t('nav.adminBiTables')}
+              {t('nav.adminBiBase')}
             </NavLink>
           </nav>
         </aside>

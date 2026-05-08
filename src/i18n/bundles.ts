@@ -14,7 +14,7 @@ const fr = {
   'nav.admin': 'Administration',
   'nav.adminUsers': 'Utilisateurs',
   'nav.adminRoles': 'Rôles',
-  'nav.adminBiTables': 'Tables BI',
+  'nav.adminBiBase': 'Base BI',
   'nav.locale': 'Langue',
   'nav.localeFr': 'FR',
   'nav.localeEn': 'EN',
@@ -132,6 +132,7 @@ const fr = {
   'admin.success.roleCreated': 'Rôle créé avec succès.',
   'admin.success.roleTablesUpdated': 'Tables du rôle mises à jour.',
   'admin.success.biTablesUpdated': 'Tables BI mises à jour.',
+  'admin.success.biConnectionUpdated': 'Connexion base BI mise à jour.',
   'chat.error.session':
     'Le chat est limité aux comptes connectés. Utilisez « Connexion » (ou « Créer un compte » si l’inscription est activée).',
   'chat.error.config':
@@ -145,6 +146,11 @@ const fr = {
   'admin.biTablesList': 'Liste des tables BI',
   'admin.biTablesHint': 'Une table par ligne.',
   'admin.biTablesSave': 'Enregistrer',
+  'admin.biConnectionTab': 'Connexion base',
+  'admin.biConnectionLabel': 'Chaîne de connexion base BI',
+  'admin.biConnectionHint':
+    'Renseignez la connexion PostgreSQL de la base BI (format postgres://...) ou laissez vide pour utiliser la connexion système.',
+  'admin.biConnectionSave': 'Enregistrer la connexion',
   'admin.history': 'Conversations',
   'admin.thUser': 'Utilisateur',
   'admin.thDisplayKey': 'Clé',
@@ -190,7 +196,7 @@ const en: Record<keyof typeof fr, string> = {
   'nav.admin': 'Administration',
   'nav.adminUsers': 'Users',
   'nav.adminRoles': 'Roles',
-  'nav.adminBiTables': 'BI Tables',
+  'nav.adminBiBase': 'BI Base',
   'nav.locale': 'Language',
   'nav.localeFr': 'FR',
   'nav.localeEn': 'EN',
@@ -308,6 +314,7 @@ const en: Record<keyof typeof fr, string> = {
   'admin.success.roleCreated': 'Role created successfully.',
   'admin.success.roleTablesUpdated': 'Role tables updated.',
   'admin.success.biTablesUpdated': 'BI tables updated.',
+  'admin.success.biConnectionUpdated': 'BI connection updated.',
   'chat.error.session':
     'The chat is limited to signed-in accounts. Use “Log in” (or “Sign up” if enabled).',
   'chat.error.config':
@@ -321,6 +328,11 @@ const en: Record<keyof typeof fr, string> = {
   'admin.biTablesList': 'BI tables list',
   'admin.biTablesHint': 'One table name per line.',
   'admin.biTablesSave': 'Save',
+  'admin.biConnectionTab': 'Database connection',
+  'admin.biConnectionLabel': 'BI database connection string',
+  'admin.biConnectionHint':
+    'Provide PostgreSQL connection string for BI database (postgres://...), or leave empty to use system connection.',
+  'admin.biConnectionSave': 'Save connection',
   'admin.history': 'Conversations',
   'admin.thUser': 'User',
   'admin.thDisplayKey': 'Key',

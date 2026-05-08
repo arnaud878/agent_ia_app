@@ -189,6 +189,12 @@ a.admin-nav-link.is-active {
   color: var(--text-h);
 }
 
+.bi-base-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;

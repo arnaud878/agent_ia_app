@@ -82,6 +82,29 @@ export async function apiSetBiTables(
   return j.tables
 }
 
+export async function apiGetBiConnection(
+  baseUrl: string,
+  token: string,
+): Promise<{ connectionString: string }> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.biConnection), {
+    headers: authHeaders(token),
+  })
+  return parseJson<{ connectionString: string }>(res)
+}
+
+export async function apiSetBiConnection(
+  baseUrl: string,
+  token: string,
+  connectionString: string,
+): Promise<{ ok: boolean }> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.biConnection), {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: JSON.stringify({ connectionString }),
+  })
+  return parseJson<{ ok: boolean }>(res)
+}
+
 export async function apiListRoles(
   baseUrl: string,
   token: string,

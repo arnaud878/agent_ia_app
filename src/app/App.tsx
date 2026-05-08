@@ -34,7 +34,7 @@ export default function App() {
           <Route index element={<Navigate to="users" replace />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="roles" element={<AdminRolesPage />} />
-          <Route path="bi-tables" element={<AdminBiTablesPage />} />
+          <Route path="bi-base" element={<AdminBiTablesPage />} />
           <Route path="history" element={<AdminHistoryPage />} />
         </Route>
       </Route>
