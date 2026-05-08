@@ -12,6 +12,7 @@ export function AdminRolesPage() {
       <h1>{t('admin.titleRoles')}</h1>
       <p className="sub">{t('admin.introRoles')}</p>
       {a.error && <p className="form-error">{a.error}</p>}
+      {a.success && <div className="admin-toast success">{a.success}</div>}
 
       <section className="admin-section">
         <h2>{t('admin.roles')}</h2>

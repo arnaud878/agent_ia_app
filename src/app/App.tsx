@@ -3,6 +3,7 @@ import { useAuth } from '@/auth/AuthContext'
 import { AdminLayout } from '@/context/AdminLayout'
 import { PageWait } from '@/components/feedback/PageWait'
 import { Layout } from '@/components/Layout'
+import { AdminBiTablesPage } from '@/pages/AdminBiTablesPage'
 import { AdminHistoryPage } from '@/pages/AdminHistoryPage'
 import { AdminRolesPage } from '@/pages/AdminRolesPage'
 import { AdminUsersPage } from '@/pages/AdminUsersPage'
@@ -33,6 +34,7 @@ export default function App() {
           <Route index element={<Navigate to="users" replace />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="roles" element={<AdminRolesPage />} />
+          <Route path="bi-tables" element={<AdminBiTablesPage />} />
           <Route path="history" element={<AdminHistoryPage />} />
         </Route>
       </Route>

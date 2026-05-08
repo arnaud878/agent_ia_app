@@ -20,6 +20,7 @@ export function AdminUsersPage() {
 
   const openEdit = (u: UserRow) => {
     a.setError(null)
+    a.setSuccess(null)
     setEditUser(u)
     setEditRoleId(u.roleId)
     setEditActive(u.active)
@@ -33,6 +34,7 @@ export function AdminUsersPage() {
     }
     setSaving(true)
     a.setError(null)
+    a.setSuccess(null)
     const body: { roleId?: string; active?: boolean; password?: string } = {}
     if (editRoleId !== editUser.roleId) {
       body.roleId = editRoleId
@@ -64,6 +66,7 @@ export function AdminUsersPage() {
         setEditUser(null)
         setEditPassword('')
         await a.load()
+        a.setSuccess(t('admin.success.userUpdated'))
       } catch (e) {
         a.setError(e instanceof Error ? e.message : t('common.error'))
       } finally {
@@ -81,6 +84,7 @@ export function AdminUsersPage() {
       <h1>{t('admin.titleUsers')}</h1>
       <p className="sub">{t('admin.introUsers')}</p>
       {a.error && <p className="form-error">{a.error}</p>}
+      {a.success && <div className="admin-toast success">{a.success}</div>}
 
       <section className="admin-section">
         <h2>{t('admin.users')}</h2>

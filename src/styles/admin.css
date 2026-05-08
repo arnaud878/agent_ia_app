@@ -123,6 +123,31 @@ a.admin-nav-link.is-active {
   margin: 0.5rem 0;
 }
 
+.form-success {
+  color: #15803d;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.admin-toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 999;
+  max-width: min(32rem, calc(100vw - 2rem));
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  font-size: 0.9rem;
+}
+
+.admin-toast.success {
+  background: #052e16;
+  color: #bbf7d0;
+  border-color: #166534;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

@@ -55,6 +55,15 @@ export function AdminLayout() {
             >
               {t('nav.adminHistory')}
             </NavLink>
+            <NavLink
+              to="/admin/bi-tables"
+              className={({ isActive }) =>
+                (isActive ? 'admin-nav-link is-active' : 'admin-nav-link') as
+                  string
+              }
+            >
+              {t('nav.adminBiTables')}
+            </NavLink>
           </nav>
         </aside>
         <main className="admin-main">

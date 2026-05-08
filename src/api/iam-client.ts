@@ -68,6 +68,20 @@ export async function apiListBiTables(
   return j.tables
 }
 
+export async function apiSetBiTables(
+  baseUrl: string,
+  token: string,
+  tableNames: string[],
+): Promise<string[]> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.biTables), {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: JSON.stringify({ tableNames }),
+  })
+  const j = await parseJson<{ tables: string[] }>(res)
+  return j.tables
+}
+
 export async function apiListRoles(
   baseUrl: string,
   token: string,
