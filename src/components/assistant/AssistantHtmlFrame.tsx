@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type { AppTheme } from '@/theme/ThemeContext'
 
 const EMBED: Record<
@@ -113,6 +120,33 @@ function buildThemedResponseStylesheet(
 </style>`
 }
 
+/** Plafond anti-dérapage mémoire ; au-delà, défilement interne possible. */
+const IFRAME_MAX_HEIGHT_PX = 50_000
+
+const MIN_IFRAME_HEIGHT_PX = 80
+
+/**
+ * Évite min-height: 100% dans le document embarqué : sinon le body prend la hauteur de
+ * l’iframe et scrollHeight ne reflète plus le contenu → hauteurs incohérentes entre bulles.
+ */
+function buildEmbedFitStylesheet(): string {
+  return `<style data-ia-embed-fit>
+  html.ia-embed--light, html.ia-embed--dark { min-height: 0 !important; }
+  html.ia-embed--light body, html.ia-embed--dark body { min-height: 0 !important; }
+</style>`
+}
+
+function measureEmbeddedContentHeight(doc: Document, body: HTMLElement): number {
+  const root = doc.documentElement
+  const raw = Math.max(
+    body.scrollHeight,
+    body.offsetHeight,
+    root?.scrollHeight ?? 0,
+    root?.offsetHeight ?? 0,
+  )
+  return Math.ceil(raw)
+}
+
 /** UMD (global Chart) : doit être exécuté avant tout &lt;script&gt; inline qui appelle new Chart(). */
 const CHART_UMD_SRC =
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js'
@@ -181,7 +215,8 @@ function injectThemeInFullDocument(
   embed: (typeof EMBED)[AppTheme],
 ): string {
   const doc = injectChartUmdAsFirstInHead(addHtmlRootClass(raw, colorScheme))
-  const block = buildThemedResponseStylesheet(colorScheme, embed)
+  const block = `${buildThemedResponseStylesheet(colorScheme, embed)}
+${buildEmbedFitStylesheet()}`
   if (/<\/head\s*>/i.test(doc)) {
     return doc.replace(/<\/head\s*>/i, (m) => `${block}
 ${m}`)
@@ -281,7 +316,7 @@ function patchChartJsInFrame(
  */
 export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  const [heightPx, setHeightPx] = useState(160)
+  const [heightPx, setHeightPx] = useState(MIN_IFRAME_HEIGHT_PX)
   const embed = EMBED[colorScheme]
 
   const applyThemedDocumentSurface = useCallback(() => {
@@ -312,29 +347,72 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
     if (!body) {
       return
     }
-    const h = Math.max(
-      body.scrollHeight,
-      doc.documentElement?.scrollHeight ?? 0,
-    )
+    const h = measureEmbeddedContentHeight(doc, body)
     if (Number.isFinite(h) && h > 0) {
-      const vh = typeof window !== 'undefined' ? window.innerHeight : 800
-      const cap = Math.min(3600, Math.max(160, vh * 0.88))
-      setHeightPx(Math.min(h + 24, cap))
+      /* Hauteur = contenu (+ petite marge) : pas de limite “vue fenêtre”, pour éviter le scroll dans l’iframe (le fil du chat défile à la place). */
+      setHeightPx(
+        Math.min(
+          IFRAME_MAX_HEIGHT_PX,
+          Math.max(MIN_IFRAME_HEIGHT_PX, h + 24),
+        ),
+      )
     }
   }, [applyThemedDocumentSurface, colorScheme])
 
+  useLayoutEffect(() => {
+    setHeightPx(MIN_IFRAME_HEIGHT_PX)
+  }, [html, messageId, colorScheme])
+
   useEffect(() => {
+    const el = iframeRef.current
+    let ro: ResizeObserver | undefined
+    let raf = 0
     const run = () => {
       fitHeight()
+    }
+    const scheduleFit = () => {
+      if (raf) {
+        cancelAnimationFrame(raf)
+      }
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        run()
+      })
     }
     const t1 = window.setTimeout(run, 80)
     const t2 = window.setTimeout(run, 600)
     const t3 = window.setTimeout(run, 2000)
+    const attachResizeObserver = () => {
+      const doc = el?.contentDocument
+      const root = doc?.documentElement
+      if (!root || typeof ResizeObserver === 'undefined') {
+        return
+      }
+      ro?.disconnect()
+      ro = new ResizeObserver(() => scheduleFit())
+      ro.observe(root)
+      if (doc.body) {
+        ro.observe(doc.body)
+      }
+    }
+    const onFrameLoad = () => {
+      run()
+      attachResizeObserver()
+    }
     window.addEventListener('resize', run)
+    el?.addEventListener('load', onFrameLoad)
+    if (el?.contentDocument?.readyState === 'complete') {
+      onFrameLoad()
+    }
     return () => {
+      if (raf) {
+        cancelAnimationFrame(raf)
+      }
       clearTimeout(t1)
       clearTimeout(t2)
       clearTimeout(t3)
+      ro?.disconnect()
+      el?.removeEventListener('load', onFrameLoad)
       window.removeEventListener('resize', run)
     }
   }, [html, colorScheme, fitHeight])
@@ -353,9 +431,10 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <base target="_blank" rel="noopener noreferrer" />
   ${buildThemedResponseStylesheet(colorScheme, embed)}
+  ${buildEmbedFitStylesheet()}
   <style>
-    html, body { margin: 0; padding: 0; min-height: 100%; }
-    body { box-sizing: border-box; padding: 0.25rem 0.15rem; overflow: auto; }
+    html, body { margin: 0; padding: 0; min-height: 0; }
+    body { box-sizing: border-box; padding: 0.25rem 0.15rem; overflow-x: auto; overflow-y: visible; }
   </style>
 </head>
 <body>${html}</body>
@@ -373,10 +452,12 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
       onLoad={fitHeight}
       style={{
         width: '100%',
-        minHeight: 80,
+        minWidth: 0,
+        minHeight: MIN_IFRAME_HEIGHT_PX,
         height: heightPx,
         border: 0,
         display: 'block',
+        overflow: 'hidden',
         background: embed.bg,
         colorScheme: embed.scheme,
       }}

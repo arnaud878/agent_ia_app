@@ -282,6 +282,8 @@
   overflow: hidden;
   background: var(--iframe-embed-bg, var(--code-bg));
   max-width: 100%;
+  min-width: 0;
+  align-self: stretch;
 }
 
 .bubble-timing {
