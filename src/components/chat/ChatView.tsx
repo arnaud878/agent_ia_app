@@ -1,12 +1,19 @@
-import type {
-  Dispatch,
-  KeyboardEvent,
-  RefObject,
-  SetStateAction,
+import {
+  useCallback,
+  type Dispatch,
+  type KeyboardEvent,
+  type RefObject,
+  type SetStateAction,
 } from 'react'
+import { pdf } from '@react-pdf/renderer'
 import { AssistantHtmlFrame } from '@/components/assistant/AssistantHtmlFrame'
+import { ChatPdfDocument } from '@/components/pdf/ChatPdfDocument'
+import {
+  collectAssistantChartDataUrls,
+  waitForChartsBeforePdfCapture,
+} from '@/lib/pdf/collect-assistant-chart-images'
 import { ChatConversationsPanel } from '@/components/chat/ChatConversationsPanel'
-import type { ConversationRow } from '@/api/chat-conversations'
+import type { ConversationAttachmentRow, ConversationRow } from '@/api/chat-conversations'
 import { useI18n } from '@/i18n'
 import { useTheme } from '@/theme/ThemeContext'
 import { formatDurationMs } from '@/lib/format-duration'
@@ -47,10 +54,25 @@ export type ChatViewProps = {
   deleteConversation: (id: string) => void
   responseMode: BiResponseMode
   setResponseMode: Dispatch<SetStateAction<BiResponseMode>>
+  attachments: ConversationAttachmentRow[]
+  selectedAttachmentIds: string[]
+  uploadingAttachment: boolean
+  uploadAttachment: (file: File) => void | Promise<void>
+  deleteAttachment: (attachmentId: string) => void | Promise<void>
+  toggleAttachmentSelection: (attachmentId: string) => void
+}
+
+function safePdfFileBase(displayKey: string, chatId: string): string {
+  const raw = (displayKey.trim() || chatId.slice(0, 8)).replace(
+    /[^a-zA-Z0-9._-]+/g,
+    '_',
+  )
+  const base = raw.slice(0, 80)
+  return base || 'conversation'
 }
 
 export function ChatView(props: ChatViewProps) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { theme: colorScheme } = useTheme()
   const {
     baseUrl,
@@ -84,7 +106,57 @@ export function ChatView(props: ChatViewProps) {
     deleteConversation,
     responseMode,
     setResponseMode,
+    attachments,
+    selectedAttachmentIds,
+    uploadingAttachment,
+    uploadAttachment,
+    deleteAttachment,
+    toggleAttachmentSelection,
   } = props
+
+  const exportPdf = useCallback(async () => {
+    try {
+      await waitForChartsBeforePdfCapture()
+      const chartDataUrlsByMessageId: Record<string, string[]> = {}
+      for (const m of messages) {
+        if (m.role === 'assistant' && m.html) {
+          chartDataUrlsByMessageId[m.id] = collectAssistantChartDataUrls(m.id)
+        }
+      }
+
+      const blob = await pdf(
+        <ChatPdfDocument
+          theme={colorScheme}
+          messages={messages}
+          chartDataUrlsByMessageId={chartDataUrlsByMessageId}
+          labels={{
+            headerTitle: t('chat.title'),
+            metaDisplayKey: `${t('chat.displayKey')} · ${displayKey.trim() || `${chatId.slice(0, 8)}…`}`,
+            metaExportedAt: `${t('chat.exportPdfDate')}: ${new Date().toLocaleString(locale === 'en' ? 'en-GB' : 'fr-FR')}`,
+            roleUser: t('chat.role.user'),
+            roleAssistant: t('chat.role.assistant'),
+          }}
+        />,
+      ).toBlob()
+      const base = safePdfFileBase(displayKey, chatId)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${base}.pdf`
+      a.rel = 'noopener'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      window.alert(t('chat.exportPdfError'))
+    }
+  }, [
+    chatId,
+    colorScheme,
+    displayKey,
+    locale,
+    messages,
+    t,
+  ])
 
   return (
     <div className="chat-app-layout">
@@ -110,6 +182,15 @@ export function ChatView(props: ChatViewProps) {
           </span>
           <button type="button" className="btn ghost" onClick={newConversation}>
             {t('chat.newConversation')}
+          </button>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => void exportPdf()}
+            disabled={messages.length === 0}
+            aria-label={t('chat.exportPdfAria')}
+          >
+            {t('chat.exportPdf')}
           </button>
         </div>
       </header>
@@ -214,19 +295,69 @@ export function ChatView(props: ChatViewProps) {
       </main>
 
       <footer className="chat-composer">
-        <textarea
-          className="chat-input"
-          rows={1}
-          placeholder={
-            configOk
-              ? t('chat.placeholderReady')
-              : t('chat.placeholderNoConfig')
-          }
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={onKeyDown}
-          disabled={!configOk || loading}
-        />
+        <div className="chat-composer-main">
+          <textarea
+            className="chat-input"
+            rows={1}
+            placeholder={
+              configOk
+                ? t('chat.placeholderReady')
+                : t('chat.placeholderNoConfig')
+            }
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={onKeyDown}
+            disabled={!configOk || loading}
+          />
+          {showConversationList && (
+            <div className="chat-attachments">
+              <label className="chat-attachments-upload">
+                <input
+                  type="file"
+                  disabled={!configOk || loading || uploadingAttachment}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      void uploadAttachment(file)
+                    }
+                    e.currentTarget.value = ''
+                  }}
+                />
+                <span>
+                  {uploadingAttachment
+                    ? t('chat.attach.uploading')
+                    : t('chat.attach.button')}
+                </span>
+              </label>
+              {attachments.length > 0 && (
+                <div className="chat-attachments-list">
+                  {attachments.map((a) => {
+                    const checked = selectedAttachmentIds.includes(a.id)
+                    return (
+                      <label key={a.id} className="chat-attachment-item">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleAttachmentSelection(a.id)}
+                          disabled={loading}
+                        />
+                        <span title={a.fileName}>{a.fileName}</span>
+                        <button
+                          type="button"
+                          className="linkish"
+                          onClick={() => void deleteAttachment(a.id)}
+                          disabled={loading}
+                        >
+                          {t('chat.attach.delete')}
+                        </button>
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div className="chat-composer-actions">
           <label className="chat-mode-field">
             <select

@@ -19,6 +19,15 @@ export type UiMessageRow = {
   createdAt: string
 }
 
+export type ConversationAttachmentRow = {
+  id: string
+  conversationId: string
+  fileName: string
+  mimeType: string
+  sizeBytes: number
+  createdAt: string
+}
+
 function authHeaders(token: string): HeadersInit {
   return {
     'Content-Type': 'application/json',
@@ -128,5 +137,54 @@ export async function apiDeleteConversation(
       }
     }
     throw new Error(msg)
+  }
+}
+
+export async function apiListConversationAttachments(
+  baseUrl: string,
+  token: string,
+  conversationId: string,
+): Promise<ConversationAttachmentRow[]> {
+  const res = await fetch(
+    apiUrl(baseUrl, IamPaths.conversationAttachments(conversationId)),
+    { headers: authHeaders(token) },
+  )
+  return parseJson<ConversationAttachmentRow[]>(res)
+}
+
+export async function apiUploadConversationAttachment(
+  baseUrl: string,
+  token: string,
+  conversationId: string,
+  file: File,
+): Promise<ConversationAttachmentRow> {
+  const fd = new FormData()
+  fd.append('file', file)
+  const res = await fetch(
+    apiUrl(baseUrl, IamPaths.conversationAttachments(conversationId)),
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    },
+  )
+  return parseJson<ConversationAttachmentRow>(res)
+}
+
+export async function apiDeleteConversationAttachment(
+  baseUrl: string,
+  token: string,
+  conversationId: string,
+  attachmentId: string,
+): Promise<void> {
+  const res = await fetch(
+    apiUrl(baseUrl, IamPaths.conversationAttachment(conversationId, attachmentId)),
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+  if (!res.ok && res.status !== 204) {
+    throw new Error(`HTTP ${res.status}`)
   }
 }

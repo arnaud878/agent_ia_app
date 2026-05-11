@@ -14,12 +14,16 @@ import {
 } from '@/api/bi-webhook'
 import {
   type AppendUiMessageBody,
+  type ConversationAttachmentRow,
+  apiDeleteConversationAttachment,
   apiDeleteConversation,
   apiGetConversationMessages,
+  apiListConversationAttachments,
   apiListConversations,
   apiPatchConversation,
   apiPostConversation,
   apiPostConversationMessage,
+  apiUploadConversationAttachment,
 } from '@/api/chat-conversations'
 import { useAuth } from '@/auth/AuthContext'
 import { getAppEnv, isEnvReady, resolveChatSessionOnly } from '@/config/env'
@@ -83,6 +87,9 @@ export function useBiChat() {
   const [responseMode, setResponseMode] = useState<BiResponseMode>(
     readStoredResponseMode,
   )
+  const [attachments, setAttachments] = useState<ConversationAttachmentRow[]>([])
+  const [selectedAttachmentIds, setSelectedAttachmentIds] = useState<string[]>([])
+  const [uploadingAttachment, setUploadingAttachment] = useState(false)
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const threadRef = useRef<HTMLDivElement>(null)
@@ -187,15 +194,18 @@ export function useBiChat() {
       setLoading(true)
       setBanner(null)
       try {
-        const rows = await apiGetConversationMessages(
-          baseUrl,
-          accessToken,
-          id,
-        )
+        const [rows, atts] = await Promise.all([
+          apiGetConversationMessages(baseUrl, accessToken, id),
+          apiListConversationAttachments(baseUrl, accessToken, id),
+        ])
         if (seq !== loadHistorySeqRef.current) {
           return
         }
         setMessages(uiMessagesToChatMessages(rows))
+        setAttachments(atts)
+        setSelectedAttachmentIds((prev) =>
+          prev.filter((x) => atts.some((a) => a.id === x)),
+        )
         setLastRaw(null)
         setStreamLines([])
         stickToBottomRef.current = true
@@ -318,6 +328,8 @@ export function useBiChat() {
     setChatId(id)
     writeSessionChatId(id)
     setMessages([])
+      setAttachments([])
+      setSelectedAttachmentIds([])
     setBanner(null)
     setLastRaw(null)
     setDraft('')
@@ -431,7 +443,13 @@ export function useBiChat() {
       const res = await fetch(
         url,
         buildBiStreamRequestInit(
-          { message: text, chatId, userId, responseMode },
+          {
+            message: text,
+            chatId,
+            userId,
+            responseMode,
+            attachmentIds: selectedAttachmentIds,
+          },
           env,
         ),
       )
@@ -569,6 +587,7 @@ export function useBiChat() {
     t,
     userId,
     responseMode,
+    selectedAttachmentIds,
     setBanner,
     setMessages,
     setDraft,
@@ -589,6 +608,52 @@ export function useBiChat() {
   )
 
   const showConversationList = Boolean(accessToken)
+
+  const uploadAttachment = useCallback(
+    async (file: File) => {
+      if (!accessToken || !baseUrl) {
+        return
+      }
+      setUploadingAttachment(true)
+      setBanner(null)
+      try {
+        const row = await apiUploadConversationAttachment(baseUrl, accessToken, chatId, file)
+        setAttachments((prev) => [row, ...prev])
+        setSelectedAttachmentIds((prev) =>
+          prev.includes(row.id) ? prev : [...prev, row.id],
+        )
+      } catch (e) {
+        setBanner(e instanceof Error ? e.message : t('common.error'))
+      } finally {
+        setUploadingAttachment(false)
+      }
+    },
+    [accessToken, baseUrl, chatId, t],
+  )
+
+  const deleteAttachment = useCallback(
+    async (attachmentId: string) => {
+      if (!accessToken || !baseUrl) {
+        return
+      }
+      try {
+        await apiDeleteConversationAttachment(baseUrl, accessToken, chatId, attachmentId)
+        setAttachments((prev) => prev.filter((a) => a.id !== attachmentId))
+        setSelectedAttachmentIds((prev) => prev.filter((x) => x !== attachmentId))
+      } catch (e) {
+        setBanner(e instanceof Error ? e.message : t('common.error'))
+      }
+    },
+    [accessToken, baseUrl, chatId, t],
+  )
+
+  const toggleAttachmentSelection = useCallback((attachmentId: string) => {
+    setSelectedAttachmentIds((prev) =>
+      prev.includes(attachmentId)
+        ? prev.filter((x) => x !== attachmentId)
+        : [...prev, attachmentId],
+    )
+  }, [])
 
   return {
     baseUrl,
@@ -622,5 +687,11 @@ export function useBiChat() {
     deleteConversation,
     responseMode,
     setResponseMode,
+    attachments,
+    selectedAttachmentIds,
+    uploadingAttachment,
+    uploadAttachment,
+    deleteAttachment,
+    toggleAttachmentSelection,
   }
 }

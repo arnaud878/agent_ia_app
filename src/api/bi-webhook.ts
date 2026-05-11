@@ -18,6 +18,7 @@ export type BiChatRequestBody = {
   message: string
   chatId: string
   userId: string
+  attachmentIds?: string[]
   /** Rapide : pas de graphique ; Pro : réponse complète avec Chart.js (défaut côté serveur si absent). */
   responseMode?: BiResponseMode
 }

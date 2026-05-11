@@ -381,6 +381,7 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
         colorScheme: embed.scheme,
       }}
       data-chat-theme={colorScheme}
+      data-ia-assistant-frame={messageId}
       sandbox="allow-scripts allow-same-origin allow-popups"
     />
   )

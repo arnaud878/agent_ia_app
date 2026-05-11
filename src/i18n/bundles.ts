@@ -55,9 +55,17 @@ const fr = {
   'chat.responseModePro': 'Pro',
   'chat.responseModeAria':
     'Mode de réponse : Rapide (texte court, sans graphique) ou Pro (analyse complète avec graphiques)',
+  'chat.attach.button': 'Joindre fichier',
+  'chat.attach.uploading': 'Upload...',
+  'chat.attach.delete': 'Supprimer',
   'chat.tech.user': 'user',
   'chat.rawToggleHide': 'Masquer le JSON',
   'chat.rawToggleShow': 'Voir le JSON',
+  'chat.exportPdf': 'Exporter PDF',
+  'chat.exportPdfAria':
+    'Exporter la conversation en PDF (texte sélectionnable, thème actuel)',
+  'chat.exportPdfError': 'Impossible de générer le PDF.',
+  'chat.exportPdfDate': 'Export',
   'auth.login.title': 'Connexion',
   'auth.login.sub.register':
     'Vous pouvez aussi créer un compte (rôle par défaut fixé côté serveur).',
@@ -251,9 +259,17 @@ const en: Record<keyof typeof fr, string> = {
   'chat.responseModePro': 'Pro',
   'chat.responseModeAria':
     'Response mode: Quick (short text, no chart) or Pro (full analysis with charts)',
+  'chat.attach.button': 'Attach file',
+  'chat.attach.uploading': 'Uploading...',
+  'chat.attach.delete': 'Delete',
   'chat.tech.user': 'user',
   'chat.rawToggleHide': 'Hide JSON',
   'chat.rawToggleShow': 'View JSON',
+  'chat.exportPdf': 'Export PDF',
+  'chat.exportPdfAria':
+    'Export conversation to PDF (selectable text, current theme)',
+  'chat.exportPdfError': 'Could not generate the PDF.',
+  'chat.exportPdfDate': 'Exported',
   'auth.login.title': 'Log in',
   'auth.login.sub.register':
     'You can also create an account (default role is set on the server).',
