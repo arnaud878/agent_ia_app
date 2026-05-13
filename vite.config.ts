@@ -8,6 +8,9 @@ const projectRoot = fileURLToPath(new URL('.', import.meta.url))
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    allowedHosts: ['multiarticulate-unapplicative-brandon.ngrok-free.dev'],
+  },
   resolve: {
     alias: {
       '@': path.join(projectRoot, 'src'),
