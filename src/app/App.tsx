@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
 import { AdminLayout } from '@/context/AdminLayout'
+import { AdminAgentLayout } from '@/context/AdminAgentLayout'
 import { PageWait } from '@/components/feedback/PageWait'
 import { Layout } from '@/components/Layout'
 import { AdminBiTablesPage } from '@/pages/AdminBiTablesPage'
@@ -8,6 +9,7 @@ import { AdminHistoryPage } from '@/pages/AdminHistoryPage'
 import { AdminLlmPage } from '@/pages/AdminLlmPage'
 import { AdminRolesPage } from '@/pages/AdminRolesPage'
 import { AdminUsersPage } from '@/pages/AdminUsersPage'
+import { AdminAgentPromptPage } from '@/pages/AdminAgentPromptPage'
 import { ChatPage } from '@/pages/ChatPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
@@ -36,7 +38,12 @@ export default function App() {
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="roles" element={<AdminRolesPage />} />
           <Route path="bi-base" element={<AdminBiTablesPage />} />
-          <Route path="llm" element={<AdminLlmPage />} />
+          <Route path="agent" element={<AdminAgentLayout />}>
+            <Route index element={<Navigate to="llm" replace />} />
+            <Route path="llm" element={<AdminLlmPage />} />
+            <Route path="prompts/:promptId" element={<AdminAgentPromptPage />} />
+          </Route>
+          <Route path="llm" element={<Navigate to="/admin/agent/llm" replace />} />
           <Route path="history" element={<AdminHistoryPage />} />
         </Route>
       </Route>

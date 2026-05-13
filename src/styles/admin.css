@@ -680,3 +680,124 @@ a.admin-nav-link.is-active {
   border-radius: 8px;
   background: #fff;
 }
+
+/* Agent IA : sous-navigation + éditeur de prompts */
+.admin-agent-shell {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.admin-agent-subnav {
+  width: 15rem;
+  flex-shrink: 0;
+  padding: 0.65rem 0.5rem 1rem;
+  border-right: 1px solid var(--border);
+  background: var(--code-bg, #1f2028);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.admin-agent-subtitle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.35rem 0.35rem;
+  opacity: 0.8;
+}
+
+.admin-agent-nav-label {
+  display: block;
+}
+
+.admin-agent-source {
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+
+.admin-agent-source.is-db {
+  color: var(--accent, #6366f1);
+}
+
+.admin-agent-source.is-file {
+  opacity: 0.55;
+}
+
+.admin-agent-content {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+
+.admin-prompt-textarea {
+  width: 100%;
+  max-width: 56rem;
+  min-height: 22rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.admin-prompt-actions {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-meta {
+  font-size: 0.88rem;
+  opacity: 0.9;
+  margin: 0.25rem 0 1rem;
+}
+
+.admin-prompt-vars {
+  max-width: 56rem;
+}
+
+.admin-h2 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.admin-var-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.admin-var-list li {
+  margin-bottom: 0.45rem;
+}
+
+.admin-var-token {
+  display: inline-block;
+  margin-right: 0.35rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: var(--card-bg, rgba(0, 0, 0, 0.12));
+  font-size: 0.8rem;
+}
+
+.admin-var-desc {
+  display: inline;
+  opacity: 0.92;
+}
+
+.admin-label-block {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  font-size: 0.92rem;
+}
+

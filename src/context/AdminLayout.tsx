@@ -1,4 +1,4 @@
-import { NavLink, Navigate, Outlet } from 'react-router-dom'
+import { NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
 import { PageWait } from '@/components/feedback/PageWait'
 import { AdminIamContext } from '@/context/admin-iam.context'
@@ -11,6 +11,7 @@ import '../styles/admin.css'
  */
 export function AdminLayout() {
   const { t } = useI18n()
+  const { pathname } = useLocation()
   const { isAdmin, user, loading } = useAuth()
   const adminIam = useAdminIam()
   if (loading) {
@@ -65,13 +66,14 @@ export function AdminLayout() {
               {t('nav.adminBiBase')}
             </NavLink>
             <NavLink
-              to="/admin/llm"
-              className={({ isActive }) =>
-                (isActive ? 'admin-nav-link is-active' : 'admin-nav-link') as
-                  string
+              to="/admin/agent/llm"
+              className={() =>
+                pathname.startsWith('/admin/agent')
+                  ? 'admin-nav-link is-active'
+                  : 'admin-nav-link'
               }
             >
-              {t('nav.adminLlm')}
+              {t('nav.adminAgent')}
             </NavLink>
           </nav>
         </aside>

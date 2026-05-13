@@ -117,6 +117,69 @@ export async function apiGetLlmSettings(
   return parseJson<{ provider: LlmProvider; model: string; hasApiKey: boolean }>(res)
 }
 
+export type AgentPromptVariableDto = {
+  token: string
+  descriptionFr: string
+  descriptionEn: string
+}
+
+export type AgentPromptListRowDto = {
+  id: string
+  fileName: string
+  labelFr: string
+  labelEn: string
+  isCustomized: boolean
+  variables: AgentPromptVariableDto[]
+}
+
+export type AgentPromptDetailDto = {
+  id: string
+  fileName: string
+  labelFr: string
+  labelEn: string
+  variables: AgentPromptVariableDto[]
+  storedBody: string
+  defaultBody: string
+  effectiveBody: string
+  isCustomized: boolean
+  updatedAt: string | null
+}
+
+export async function apiListAgentPrompts(
+  baseUrl: string,
+  token: string,
+): Promise<AgentPromptListRowDto[]> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.agentPrompts), {
+    headers: authHeaders(token),
+  })
+  return parseJson<AgentPromptListRowDto[]>(res)
+}
+
+export async function apiGetAgentPrompt(
+  baseUrl: string,
+  token: string,
+  id: string,
+): Promise<AgentPromptDetailDto> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.agentPrompt(id)), {
+    headers: authHeaders(token),
+  })
+  return parseJson<AgentPromptDetailDto>(res)
+}
+
+export async function apiPutAgentPrompt(
+  baseUrl: string,
+  token: string,
+  id: string,
+  body: { body: string },
+): Promise<{ ok: boolean }> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.agentPrompt(id)), {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: JSON.stringify(body),
+  })
+  return parseJson<{ ok: boolean }>(res)
+}
+
 export async function apiSetLlmSettings(
   baseUrl: string,
   token: string,

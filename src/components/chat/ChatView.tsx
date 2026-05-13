@@ -266,19 +266,17 @@ export function ChatView(props: ChatViewProps) {
           {loading && (
             <div className="chat-bubble assistant typing stream-bubble">
               <div className="bubble-label">{t('chat.role.assistant')}</div>
+              <p className="stream-log-hint">{t('chat.streamHint')}</p>
               {streamLines.length > 0 && (
-                <>
-                  <p className="stream-log-hint">{t('chat.streamHint')}</p>
-                  <ol
-                    className="stream-log"
-                    ref={streamListRef}
-                    aria-label={t('chat.streamLogLabel')}
-                  >
-                    {streamLines.map((line, i) => (
-                      <li key={`${i}-${line.slice(0, 32)}`}>{line}</li>
-                    ))}
-                  </ol>
-                </>
+                <ol
+                  className="stream-log"
+                  ref={streamListRef}
+                  aria-label={t('chat.streamLogLabel')}
+                >
+                  {streamLines.map((line, i) => (
+                    <li key={`${i}-${line.slice(0, 32)}`}>{line}</li>
+                  ))}
+                </ol>
               )}
               <div className="typing-dots" aria-hidden>
                 <span />

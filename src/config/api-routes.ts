@@ -21,6 +21,8 @@ export const IamPaths = {
   biTables: '/iam/bi-tables',
   biConnection: '/iam/bi-connection',
   llmSettings: '/iam/llm-settings',
+  agentPrompts: '/iam/agent-prompts',
+  agentPrompt: (id: string) => `/iam/agent-prompts/${id}` as const,
   roles: '/iam/roles',
   users: '/iam/users',
   roleTables: (roleId: string) => `/iam/roles/${roleId}/tables` as const,
