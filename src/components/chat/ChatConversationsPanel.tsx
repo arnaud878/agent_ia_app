@@ -8,6 +8,29 @@ type Props = {
   activeId: string
   onSelect: (id: string) => void
   onDelete: (id: string) => void
+  onCollapse: () => void
+}
+
+function IconChevronLeft({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      width="1.15em"
+      height="1.15em"
+      aria-hidden
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M15 6l-6 6 6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 function formatListTitle(c: ConversationRow, untitled: string) {
@@ -25,16 +48,31 @@ export function ChatConversationsPanel({
   activeId,
   onSelect,
   onDelete,
+  onCollapse,
 }: Props) {
   const { t } = useI18n()
   const list = conversations ?? []
 
   return (
     <aside
+      id="chat-conversations-panel"
       className="chat-conversations"
       aria-label={t('chat.conversations.title')}
     >
-        <h2 className="chat-conv-title">{t('chat.conversations.title')}</h2>
+        <div className="chat-conv-header">
+          <h2 className="chat-conv-title">{t('chat.conversations.title')}</h2>
+          <button
+            type="button"
+            className="chat-conv-collapse"
+            onClick={onCollapse}
+            aria-expanded
+            aria-controls="chat-conversations-panel"
+            aria-label={t('chat.conversations.hideListAria')}
+            title={t('chat.conversations.hideList')}
+          >
+            <IconChevronLeft />
+          </button>
+        </div>
         {loading && <p className="chat-conv-status">{t('common.loading')}</p>}
         {error && <p className="chat-conv-status error">{t('common.error')}</p>}
         {!loading && !error && list.length === 0 && (

@@ -218,6 +218,12 @@ const fr = {
   'chat.conversations.delete': 'Supprimer',
   'chat.conversations.deleteConfirm': 'Supprimer cette conversation ? Cette action est irréversible.',
   'chat.conversations.deleteAria': 'Supprimer cette conversation',
+  'chat.conversations.hideList': 'Réduire la liste',
+  'chat.conversations.showList': 'Conversations',
+  'chat.conversations.hideListAria':
+    'Masquer la liste des conversations pour libérer de l’espace',
+  'chat.conversations.showListAria':
+    'Afficher la liste des conversations à gauche',
   'chat.assistant.emptyBody': 'Réponse sans corps (stream).',
   'chat.assistant.noOutputField': 'Réponse sans champ output.',
   'chat.assistant.incomplete': 'Le flux s’est arrêté sans réponse complète.',
@@ -438,6 +444,12 @@ const en: Record<keyof typeof fr, string> = {
   'chat.conversations.delete': 'Delete',
   'chat.conversations.deleteConfirm': 'Delete this conversation? This cannot be undone.',
   'chat.conversations.deleteAria': 'Delete this conversation',
+  'chat.conversations.hideList': 'Hide list',
+  'chat.conversations.showList': 'Conversations',
+  'chat.conversations.hideListAria':
+    'Hide the conversation list to free space',
+  'chat.conversations.showListAria':
+    'Show the conversation list on the left',
   'chat.assistant.emptyBody': 'Empty response body (stream).',
   'chat.assistant.noOutputField': 'Response without output field.',
   'chat.assistant.incomplete': 'The stream ended without a complete answer.',

@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useState,
   type Dispatch,
   type KeyboardEvent,
   type RefObject,
@@ -62,6 +63,30 @@ export type ChatViewProps = {
   toggleAttachmentSelection: (attachmentId: string) => void
 }
 
+const CONV_LIST_COLLAPSED_KEY = 'ia_chat_conv_list_collapsed'
+
+function readConvListCollapsed(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+  try {
+    return window.localStorage.getItem(CONV_LIST_COLLAPSED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function writeConvListCollapsed(collapsed: boolean) {
+  if (typeof window === 'undefined') {
+    return
+  }
+  try {
+    window.localStorage.setItem(CONV_LIST_COLLAPSED_KEY, collapsed ? '1' : '0')
+  } catch {
+    /* ignore */
+  }
+}
+
 function safePdfFileBase(displayKey: string, chatId: string): string {
   const raw = (displayKey.trim() || chatId.slice(0, 8)).replace(
     /[^a-zA-Z0-9._-]+/g,
@@ -114,6 +139,18 @@ export function ChatView(props: ChatViewProps) {
     toggleAttachmentSelection,
   } = props
 
+  const [convListCollapsed, setConvListCollapsed] = useState(() =>
+    readConvListCollapsed(),
+  )
+
+  const toggleConvListCollapsed = useCallback(() => {
+    setConvListCollapsed((prev) => {
+      const next = !prev
+      writeConvListCollapsed(next)
+      return next
+    })
+  }, [])
+
   const exportPdf = useCallback(async () => {
     try {
       await waitForChartsBeforePdfCapture()
@@ -159,8 +196,10 @@ export function ChatView(props: ChatViewProps) {
   ])
 
   return (
-    <div className="chat-app-layout">
-      {showConversationList && (
+    <div
+      className={`chat-app-layout${showConversationList && convListCollapsed ? ' chat-conv-list-collapsed' : ''}`}
+    >
+      {showConversationList && !convListCollapsed && (
         <ChatConversationsPanel
           conversations={conversations}
           loading={conversationsLoading}
@@ -168,7 +207,23 @@ export function ChatView(props: ChatViewProps) {
           activeId={chatId}
           onSelect={selectConversation}
           onDelete={deleteConversation}
+          onCollapse={toggleConvListCollapsed}
         />
+      )}
+      {showConversationList && convListCollapsed && (
+        <button
+          type="button"
+          className="chat-conv-reveal"
+          onClick={toggleConvListCollapsed}
+          aria-expanded={false}
+          aria-controls="chat-conversations-panel"
+          aria-label={t('chat.conversations.showListAria')}
+          title={t('chat.conversations.showList')}
+        >
+          <span className="chat-conv-reveal-icon" aria-hidden>
+            ›
+          </span>
+        </button>
       )}
       <div className="chat-app">
         <header className="chat-header">

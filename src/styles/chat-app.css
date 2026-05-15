@@ -12,6 +12,40 @@
   align-items: stretch;
 }
 
+.chat-app-layout.chat-conv-list-collapsed {
+  gap: 0.5rem;
+}
+
+.chat-conv-reveal {
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  min-width: 2.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border, #2e303a);
+  border-radius: 10px;
+  background: var(--code-bg, #1f2028);
+  color: var(--text-h, #e8e8eb);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.chat-conv-reveal:hover {
+  color: var(--text-h);
+  background: var(--panel-hover, #2a2b35);
+}
+
+.chat-conv-reveal-icon {
+  font-size: 1.35rem;
+  font-weight: 600;
+  user-select: none;
+}
+
 .chat-conversations {
   width: 13rem;
   flex-shrink: 0;
@@ -26,11 +60,46 @@
   box-sizing: border-box;
 }
 
+.chat-conv-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.45rem;
+  min-width: 0;
+}
+
 .chat-conv-title {
   font-size: 0.8rem;
   font-weight: 600;
-  margin: 0 0 0.45rem;
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--text-h, #e8e8eb);
+}
+
+.chat-conv-collapse {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--border, #2e303a);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text, #b8bac4);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.chat-conv-collapse:hover {
+  color: var(--text-h, #e8e8eb);
+  background: var(--panel-hover, #2a2b35);
+  border-color: var(--border-strong, #3d404c);
 }
 
 .chat-conv-status {
