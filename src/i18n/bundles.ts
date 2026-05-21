@@ -158,9 +158,10 @@ const fr = {
   'admin.biTablesHint': 'Une table par ligne.',
   'admin.biTablesSave': 'Enregistrer',
   'admin.biConnectionTab': 'Connexion base',
+  'admin.biDbTypeLabel': 'Type de base de données',
   'admin.biConnectionLabel': 'Chaîne de connexion base BI',
   'admin.biConnectionHint':
-    'Renseignez la connexion PostgreSQL de la base BI (format postgres://...) ou laissez vide pour utiliser la connexion système.',
+    'Choisissez le type de base (PostgreSQL ou MySQL/MariaDB), renseignez la chaîne de connexion puis enregistrez. Laissez vide pour utiliser la connexion système (PostgreSQL).',
   'admin.biConnectionSave': 'Enregistrer la connexion',
   'admin.titleLlm': 'Configuration LLM',
   'admin.introLlm':
@@ -385,9 +386,10 @@ const en: Record<keyof typeof fr, string> = {
   'admin.biTablesHint': 'One table name per line.',
   'admin.biTablesSave': 'Save',
   'admin.biConnectionTab': 'Database connection',
+  'admin.biDbTypeLabel': 'Database type',
   'admin.biConnectionLabel': 'BI database connection string',
   'admin.biConnectionHint':
-    'Provide PostgreSQL connection string for BI database (postgres://...), or leave empty to use system connection.',
+    'Select the database type (PostgreSQL or MySQL/MariaDB), fill in the connection string and save. Leave empty to use the system connection (PostgreSQL).',
   'admin.biConnectionSave': 'Save connection',
   'admin.titleLlm': 'LLM Configuration',
   'admin.introLlm':

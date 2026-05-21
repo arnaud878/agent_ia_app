@@ -82,25 +82,28 @@ export async function apiSetBiTables(
   return j.tables
 }
 
+export type BiDbType = 'postgresql' | 'mysql'
+
 export async function apiGetBiConnection(
   baseUrl: string,
   token: string,
-): Promise<{ connectionString: string }> {
+): Promise<{ connectionString: string; dbType: BiDbType }> {
   const res = await fetch(apiUrl(baseUrl, IamPaths.biConnection), {
     headers: authHeaders(token),
   })
-  return parseJson<{ connectionString: string }>(res)
+  return parseJson<{ connectionString: string; dbType: BiDbType }>(res)
 }
 
 export async function apiSetBiConnection(
   baseUrl: string,
   token: string,
   connectionString: string,
+  dbType: BiDbType = 'postgresql',
 ): Promise<{ ok: boolean }> {
   const res = await fetch(apiUrl(baseUrl, IamPaths.biConnection), {
     method: 'PUT',
     headers: authHeaders(token),
-    body: JSON.stringify({ connectionString }),
+    body: JSON.stringify({ connectionString, dbType }),
   })
   return parseJson<{ ok: boolean }>(res)
 }

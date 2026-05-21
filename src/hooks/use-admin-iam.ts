@@ -13,6 +13,7 @@ import {
   apiSetBiTables,
   apiSetLlmSettings,
   apiSetRoleTables,
+  type BiDbType,
   type LlmProvider,
 } from '@/api/iam-client'
 import type { RoleRow, UserRow } from '@/auth/types'
@@ -49,6 +50,7 @@ export function useAdminIam() {
   )
   const [biTablesDraft, setBiTablesDraft] = useState('')
   const [biConnectionDraft, setBiConnectionDraft] = useState('')
+  const [biDbType, setBiDbType] = useState<BiDbType>('postgresql')
   const [llmProvider, setLlmProvider] = useState<LlmProvider>('gemini')
   const [llmModel, setLlmModel] = useState('gemini-2.5-flash')
   const [llmApiKey, setLlmApiKey] = useState('')
@@ -72,6 +74,7 @@ export function useAdminIam() {
     setBiTables(bi)
     setBiTablesDraft(bi.join('\n'))
     setBiConnectionDraft(conn.connectionString || '')
+    setBiDbType(conn.dbType ?? 'postgresql')
     setLlmProvider(llm.provider)
     setLlmModel(llm.model)
     setLlmHasApiKey(llm.hasApiKey)
@@ -218,7 +221,7 @@ export function useAdminIam() {
     setSuccess(null)
     void (async () => {
       try {
-        await apiSetBiConnection(baseUrl, token, biConnectionDraft)
+        await apiSetBiConnection(baseUrl, token, biConnectionDraft, biDbType)
         await load()
         setSuccess(t('admin.success.biConnectionUpdated'))
       } catch (e) {
@@ -282,6 +285,8 @@ export function useAdminIam() {
     setBiTablesDraft,
     biConnectionDraft,
     setBiConnectionDraft,
+    biDbType,
+    setBiDbType,
     llmProvider,
     setLlmProvider,
     llmModel,

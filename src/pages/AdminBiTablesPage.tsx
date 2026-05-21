@@ -65,13 +65,30 @@ export function AdminBiTablesPage() {
           <>
             <p className="sub">{t('admin.biConnectionHint')}</p>
             <div className="form-row" style={{ maxWidth: '52rem' }}>
+              <label htmlFor="bi-db-type">{t('admin.biDbTypeLabel')}</label>
+              <select
+                id="bi-db-type"
+                value={a.biDbType}
+                onChange={(e) =>
+                  a.setBiDbType(e.target.value as 'postgresql' | 'mysql')
+                }
+              >
+                <option value="postgresql">PostgreSQL</option>
+                <option value="mysql">MySQL / MariaDB</option>
+              </select>
+            </div>
+            <div className="form-row" style={{ maxWidth: '52rem' }}>
               <label htmlFor="bi-conn">{t('admin.biConnectionLabel')}</label>
               <textarea
                 id="bi-conn"
                 rows={5}
                 value={a.biConnectionDraft}
                 onChange={(e) => a.setBiConnectionDraft(e.target.value)}
-                placeholder="postgres://user:pass@host:5432/database"
+                placeholder={
+                  a.biDbType === 'mysql'
+                    ? 'mysql://user:pass@host:3306/database'
+                    : 'postgres://user:pass@host:5432/database'
+                }
                 style={{
                   fontFamily: 'monospace',
                   fontSize: '0.9rem',
