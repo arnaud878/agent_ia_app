@@ -165,10 +165,25 @@
 }
 
 .chat-conv-item-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.chat-conv-item-title {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-conv-item-busy {
+  flex-shrink: 0;
+  opacity: 0.65;
+  font-size: 0.85em;
 }
 
 .chat-conv-delete {

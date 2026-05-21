@@ -6,6 +6,7 @@ type Props = {
   loading: boolean
   error: boolean
   activeId: string
+  loadingConversationIds?: ReadonlySet<string>
   onSelect: (id: string) => void
   onDelete: (id: string) => void
   onCollapse: () => void
@@ -46,6 +47,7 @@ export function ChatConversationsPanel({
   loading,
   error,
   activeId,
+  loadingConversationIds,
   onSelect,
   onDelete,
   onCollapse,
@@ -79,7 +81,9 @@ export function ChatConversationsPanel({
           <p className="chat-conv-hint">{t('chat.conversations.empty')}</p>
         )}
         <ul className="chat-conv-list" role="list">
-          {list.map((c) => (
+          {list.map((c) => {
+            const inFlight = loadingConversationIds?.has(c.id) ?? false
+            return (
             <li key={c.id} className="chat-conv-item-wrap">
               <button
                 type="button"
@@ -90,7 +94,14 @@ export function ChatConversationsPanel({
                 title={c.title?.trim() || t('chat.conversations.untitled')}
               >
                 <span className="chat-conv-item-label">
-                  {formatListTitle(c, t('chat.conversations.untitled'))}
+                  <span className="chat-conv-item-title">
+                    {formatListTitle(c, t('chat.conversations.untitled'))}
+                  </span>
+                  {inFlight && (
+                    <span className="chat-conv-item-busy" aria-hidden>
+                      …
+                    </span>
+                  )}
                 </span>
               </button>
               <button
@@ -106,7 +117,7 @@ export function ChatConversationsPanel({
                 ×
               </button>
             </li>
-          ))}
+          )})}
         </ul>
     </aside>
   )

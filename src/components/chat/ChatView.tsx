@@ -34,6 +34,8 @@ export type ChatViewProps = {
   draft: string
   setDraft: Dispatch<SetStateAction<string>>
   loading: boolean
+  /** Réponse IA en cours (minuteur live + bulle stream) */
+  streaming: boolean
   banner: string | null
   lastRaw: unknown
   showRaw: boolean
@@ -53,6 +55,7 @@ export type ChatViewProps = {
   conversationsError: boolean
   selectConversation: (id: string) => void
   deleteConversation: (id: string) => void
+  loadingConversationIds?: ReadonlySet<string>
   responseMode: BiResponseMode
   setResponseMode: Dispatch<SetStateAction<BiResponseMode>>
   attachments: ConversationAttachmentRow[]
@@ -110,6 +113,7 @@ export function ChatView(props: ChatViewProps) {
     draft,
     setDraft,
     loading,
+    streaming,
     banner,
     lastRaw,
     showRaw,
@@ -129,6 +133,7 @@ export function ChatView(props: ChatViewProps) {
     conversationsError,
     selectConversation,
     deleteConversation,
+    loadingConversationIds,
     responseMode,
     setResponseMode,
     attachments,
@@ -205,6 +210,7 @@ export function ChatView(props: ChatViewProps) {
           loading={conversationsLoading}
           error={conversationsError}
           activeId={chatId}
+          loadingConversationIds={loadingConversationIds}
           onSelect={selectConversation}
           onDelete={deleteConversation}
           onCollapse={toggleConvListCollapsed}
@@ -318,7 +324,7 @@ export function ChatView(props: ChatViewProps) {
               )}
             </div>
           ))}
-          {loading && (
+          {streaming && (
             <div className="chat-bubble assistant typing stream-bubble">
               <div className="bubble-label">{t('chat.role.assistant')}</div>
               <p className="stream-log-hint">{t('chat.streamHint')}</p>
@@ -360,14 +366,14 @@ export function ChatView(props: ChatViewProps) {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKeyDown}
-            disabled={!configOk || loading}
+            disabled={!configOk || streaming}
           />
           {showConversationList && (
             <div className="chat-attachments">
               <label className="chat-attachments-upload">
                 <input
                   type="file"
-                  disabled={!configOk || loading || uploadingAttachment}
+                  disabled={!configOk || streaming || uploadingAttachment}
                   onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) {
@@ -392,14 +398,14 @@ export function ChatView(props: ChatViewProps) {
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggleAttachmentSelection(a.id)}
-                          disabled={loading}
+                          disabled={streaming}
                         />
                         <span title={a.fileName}>{a.fileName}</span>
                         <button
                           type="button"
                           className="linkish"
                           onClick={() => void deleteAttachment(a.id)}
-                          disabled={loading}
+                          disabled={streaming}
                         >
                           {t('chat.attach.delete')}
                         </button>
@@ -422,7 +428,7 @@ export function ChatView(props: ChatViewProps) {
                   setResponseMode(v)
                 }
               }}
-              disabled={loading}
+              disabled={streaming}
               aria-label={t('chat.responseModeAria')}
             >
               <option value="quick">{t('chat.responseModeQuick')}</option>
@@ -433,9 +439,9 @@ export function ChatView(props: ChatViewProps) {
             type="button"
             className="btn send chat-composer-send"
             onClick={() => void send()}
-            disabled={!configOk || loading || !draft.trim()}
+            disabled={!configOk || streaming || !draft.trim()}
           >
-            {loading ? t('chat.sending') : t('chat.send')}
+            {streaming ? t('chat.sending') : t('chat.send')}
           </button>
         </div>
       </footer>

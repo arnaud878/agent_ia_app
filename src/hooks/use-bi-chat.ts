@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type SetStateAction,
 } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -53,6 +54,34 @@ function readStoredResponseMode(): BiResponseMode {
   return 'pro'
 }
 
+export type ConversationUiState = {
+  messages: ChatMessage[]
+  draft: string
+  /** Chargement historique ou réponse IA en cours */
+  loading: boolean
+  /** Horodatage (performance.now) du début de la requête IA — conserve le temps si on change de fil */
+  streamStartedAt: number | null
+  streamLines: string[]
+  lastRaw: unknown | null
+  liveElapsedMs: number
+  attachments: ConversationAttachmentRow[]
+  selectedAttachmentIds: string[]
+}
+
+function defaultConversationUiState(): ConversationUiState {
+  return {
+    messages: [],
+    draft: '',
+    loading: false,
+    streamStartedAt: null,
+    streamLines: [],
+    lastRaw: null,
+    liveElapsedMs: 0,
+    attachments: [],
+    selectedAttachmentIds: [],
+  }
+}
+
 export function useBiChat() {
   const { t } = useI18n()
   const queryClient = useQueryClient()
@@ -74,21 +103,15 @@ export function useBiChat() {
     const fromSession = readSessionChatId()
     return fromSession || crypto.randomUUID()
   })
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [draft, setDraft] = useState('')
-  const [loading, setLoading] = useState(false)
+  /** État UI par conversation : les requêtes en cours continuent même si on change de fil. */
+  const [convStates, setConvStates] = useState<
+    Record<string, ConversationUiState>
+  >({})
   const [banner, setBanner] = useState<string | null>(null)
-  const [lastRaw, setLastRaw] = useState<unknown>(null)
   const [showRaw, setShowRaw] = useState(false)
-  const [liveElapsedMs, setLiveElapsedMs] = useState(0)
-  /** Affichage : à 0 dès que le chargement est terminé (évite setState dans l’effet du timer) */
-  const displayLiveElapsedMs = loading ? liveElapsedMs : 0
-  const [streamLines, setStreamLines] = useState<string[]>([])
   const [responseMode, setResponseMode] = useState<BiResponseMode>(
     readStoredResponseMode,
   )
-  const [attachments, setAttachments] = useState<ConversationAttachmentRow[]>([])
-  const [selectedAttachmentIds, setSelectedAttachmentIds] = useState<string[]>([])
   const [uploadingAttachment, setUploadingAttachment] = useState(false)
 
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -98,15 +121,106 @@ export function useBiChat() {
   const ensuredSessionRef = useRef(false)
   const loadHistorySeqRef = useRef(0)
   const autoHistoryAttemptedForRef = useRef<string | null>(null)
-  /** Messages par conversation (session) : évite de refetch à chaque retour sur un fil. */
   const messagesByConvCacheRef = useRef(new Map<string, ChatMessage[]>())
+  /** Horodatage de requête IA par fil (ref : survit aux mises à jour React intermédiaires). */
+  const streamStartedRef = useRef(new Map<string, number>())
+  const convStatesRef = useRef(convStates)
+  useEffect(() => {
+    convStatesRef.current = convStates
+  }, [convStates])
+
+  const patchConv = useCallback(
+    (
+      convId: string,
+      patch:
+        | Partial<ConversationUiState>
+        | ((prev: ConversationUiState) => Partial<ConversationUiState>),
+    ) => {
+      setConvStates((prev) => {
+        const cur = prev[convId] ?? defaultConversationUiState()
+        const delta = typeof patch === 'function' ? patch(cur) : patch
+        return { ...prev, [convId]: { ...cur, ...delta } }
+      })
+    },
+    [],
+  )
+
+  const patchConvMessages = useCallback(
+    (convId: string, fn: (m: ChatMessage[]) => ChatMessage[]) => {
+      setConvStates((prev) => {
+        const cur = prev[convId] ?? defaultConversationUiState()
+        return {
+          ...prev,
+          [convId]: { ...cur, messages: fn(cur.messages) },
+        }
+      })
+    },
+    [],
+  )
+
+  const activeState = useMemo(
+    () => convStates[chatId] ?? defaultConversationUiState(),
+    [convStates, chatId],
+  )
+
+  const messages = activeState.messages
+  const draft = activeState.draft
+  const loading = activeState.loading
+  const streaming =
+    streamStartedRef.current.has(chatId) ||
+    activeState.streamStartedAt != null
+  const lastRaw = activeState.lastRaw
+  const streamLines = activeState.streamLines
+  const attachments = activeState.attachments
+  const selectedAttachmentIds = activeState.selectedAttachmentIds
+
+  const [streamTick, setStreamTick] = useState(0)
+
+  const hasStreaming = useMemo(() => {
+    if (streamStartedRef.current.size > 0) {
+      return true
+    }
+    return Object.values(convStates).some((s) => s.streamStartedAt != null)
+  }, [convStates, streamTick])
+  useEffect(() => {
+    if (!hasStreaming) {
+      return
+    }
+    const id = window.setInterval(() => {
+      setStreamTick((n) => n + 1)
+    }, 100)
+    return () => {
+      clearInterval(id)
+    }
+  }, [hasStreaming])
+
+  const displayLiveElapsedMs = useMemo(() => {
+    const started =
+      streamStartedRef.current.get(chatId) ?? activeState.streamStartedAt
+    if (started == null) {
+      return 0
+    }
+    return Math.max(0, Math.round(performance.now() - started))
+  }, [chatId, activeState.streamStartedAt, streamTick])
+
+  const loadingConversationIds = useMemo(() => {
+    const ids = new Set(streamStartedRef.current.keys())
+    for (const [id, s] of Object.entries(convStates)) {
+      if (s.streamStartedAt != null) {
+        ids.add(id)
+      }
+    }
+    return ids
+  }, [convStates, streamTick])
 
   useEffect(() => {
-    messagesByConvCacheRef.current.set(
-      chatId,
-      messages.map((m) => ({ ...m })),
-    )
-  }, [chatId, messages])
+    for (const [id, state] of Object.entries(convStates)) {
+      messagesByConvCacheRef.current.set(
+        id,
+        state.messages.map((m) => ({ ...m })),
+      )
+    }
+  }, [convStates])
 
   const { data: conversationsQueryData, isLoading: conversationsLoading, isError: conversationsError } =
     useQuery({
@@ -116,7 +230,6 @@ export function useBiChat() {
       refetchOnMount: 'always',
     })
 
-  /** Dernière activité en tête (updatedAt, puis createdAt). */
   const conversations = useMemo(() => {
     if (!conversationsQueryData?.length) {
       return conversationsQueryData
@@ -148,18 +261,18 @@ export function useBiChat() {
   }, [queryClient, baseUrl, accessToken])
 
   const postUi = useCallback(
-    (body: AppendUiMessageBody) => {
+    (convId: string, body: AppendUiMessageBody) => {
       if (!accessToken) {
         return
       }
       void apiPostConversationMessage(
         baseUrl,
         accessToken,
-        chatId,
+        convId,
         body,
       ).catch(() => {})
     },
-    [accessToken, baseUrl, chatId],
+    [accessToken, baseUrl],
   )
 
   const postConversationAndRefresh = useCallback(
@@ -184,14 +297,18 @@ export function useBiChat() {
       if (!accessToken || !baseUrl) {
         return
       }
-      const seq = ++loadHistorySeqRef.current
       setChatId(id)
       writeSessionChatId(id)
+      if (convStatesRef.current[id]?.streamStartedAt != null) {
+        return
+      }
+      const seq = ++loadHistorySeqRef.current
 
-      /* Toujours recharger l’API : le cache de session pouvait figer un extrait
-       * incomplété si la fil s’est enrichi en base après la première visite. */
-      setLiveElapsedMs(0)
-      setLoading(true)
+      patchConv(id, {
+        loading: true,
+        streamLines: [],
+        lastRaw: null,
+      })
       setBanner(null)
       try {
         const [rows, atts] = await Promise.all([
@@ -201,13 +318,16 @@ export function useBiChat() {
         if (seq !== loadHistorySeqRef.current) {
           return
         }
-        setMessages(uiMessagesToChatMessages(rows))
-        setAttachments(atts)
-        setSelectedAttachmentIds((prev) =>
-          prev.filter((x) => atts.some((a) => a.id === x)),
-        )
-        setLastRaw(null)
-        setStreamLines([])
+        const uiMessages = uiMessagesToChatMessages(rows)
+        patchConv(id, (cur) => ({
+          messages: uiMessages,
+          attachments: atts,
+          selectedAttachmentIds: cur.selectedAttachmentIds.filter((x) =>
+            atts.some((a) => a.id === x),
+          ),
+          lastRaw: null,
+          streamLines: [],
+        }))
         stickToBottomRef.current = true
       } catch {
         if (seq === loadHistorySeqRef.current) {
@@ -215,22 +335,11 @@ export function useBiChat() {
         }
       } finally {
         if (seq === loadHistorySeqRef.current) {
-          setLoading(false)
+          patchConv(id, { loading: false })
         }
       }
     },
-    [
-      accessToken,
-      baseUrl,
-      t,
-      setChatId,
-      setLoading,
-      setBanner,
-      setMessages,
-      setLastRaw,
-      setStreamLines,
-      setLiveElapsedMs,
-    ],
+    [accessToken, baseUrl, t, patchConv],
   )
 
   useEffect(() => {
@@ -244,7 +353,8 @@ export function useBiChat() {
     if (!conversations?.length || !conversations.some((c) => c.id === chatId)) {
       return
     }
-    if (messages.length > 0 || autoHistoryAttemptedForRef.current === chatId) {
+    const activeMessages = convStates[chatId]?.messages ?? []
+    if (activeMessages.length > 0 || autoHistoryAttemptedForRef.current === chatId) {
       return
     }
     autoHistoryAttemptedForRef.current = chatId
@@ -255,9 +365,8 @@ export function useBiChat() {
     chatId,
     conversations,
     conversationsLoading,
+    convStates,
     loadConversationHistory,
-    messages.length,
-    setMessages,
   ])
 
   useEffect(() => {
@@ -297,24 +406,11 @@ export function useBiChat() {
   }, [responseMode])
 
   useEffect(() => {
-    if (!loading) {
-      return
-    }
-    const t0 = performance.now()
-    const id = window.setInterval(() => {
-      setLiveElapsedMs(Math.round(performance.now() - t0))
-    }, 100)
-    return () => {
-      clearInterval(id)
-    }
-  }, [loading])
-
-  useEffect(() => {
     if (!stickToBottomRef.current) {
       return
     }
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading, streamLines])
+  }, [messages, streaming, streamLines])
 
   useEffect(() => {
     const el = streamListRef.current
@@ -323,35 +419,29 @@ export function useBiChat() {
     }
   }, [streamLines])
 
+  const setDraft = useCallback(
+    (value: SetStateAction<string>) => {
+      patchConv(chatId, (cur) => ({
+        draft: typeof value === 'function' ? value(cur.draft) : value,
+      }))
+    },
+    [chatId, patchConv],
+  )
+
   const newConversation = useCallback(() => {
     const id = crypto.randomUUID()
     setChatId(id)
     writeSessionChatId(id)
-    setMessages([])
-      setAttachments([])
-      setSelectedAttachmentIds([])
-    setBanner(null)
-    setLastRaw(null)
-    setDraft('')
-    setStreamLines([])
     stickToBottomRef.current = true
+    setBanner(null)
     postConversationAndRefresh(id)
-  }, [
-    postConversationAndRefresh,
-    setChatId,
-    setMessages,
-    setBanner,
-    setLastRaw,
-    setDraft,
-    setStreamLines,
-  ])
+  }, [postConversationAndRefresh])
 
   const selectConversation = useCallback(
     async (id: string) => {
       if (!accessToken) {
         setChatId(id)
         writeSessionChatId(id)
-        setMessages([])
         return
       }
       const fromList = conversations?.find((c) => c.id === id)
@@ -360,8 +450,13 @@ export function useBiChat() {
       }
       await loadConversationHistory(id)
     },
-    [accessToken, conversations, loadConversationHistory, setChatId, setMessages],
+    [accessToken, conversations, loadConversationHistory],
   )
+
+  const measureStreamDuration = useCallback((convId: string, fallbackStart: number) => {
+    const started = streamStartedRef.current.get(convId) ?? fallbackStart
+    return Math.max(0, Math.round(performance.now() - started))
+  }, [])
 
   const deleteConversation = useCallback(
     (id: string) => {
@@ -375,6 +470,11 @@ export function useBiChat() {
         try {
           await apiDeleteConversation(baseUrl, accessToken, id)
           messagesByConvCacheRef.current.delete(id)
+          setConvStates((prev) => {
+            const next = { ...prev }
+            delete next[id]
+            return next
+          })
           refreshConversationList()
           if (id === chatId) {
             newConversation()
@@ -391,13 +491,14 @@ export function useBiChat() {
       newConversation,
       refreshConversationList,
       t,
-      setBanner,
     ],
   )
 
   const send = useCallback(async () => {
-    const text = draft.trim()
-    if (!text || loading) {
+    const convId = chatId
+    const conv = convStates[convId] ?? defaultConversationUiState()
+    const text = conv.draft.trim()
+    if (!text || conv.streamStartedAt != null) {
       return
     }
     if (!configOk) {
@@ -407,7 +508,7 @@ export function useBiChat() {
       return
     }
 
-    const wasThreadEmpty = messages.length === 0
+    const wasThreadEmpty = conv.messages.length === 0
 
     setBanner(null)
     stickToBottomRef.current = true
@@ -416,23 +517,28 @@ export function useBiChat() {
       role: 'user',
       text,
     }
-    setMessages((m) => [...m, userMsg])
-    postUi({ role: 'user', text })
-    setDraft('')
-    setStreamLines([])
-    setLiveElapsedMs(0)
-    setLoading(true)
-    setLastRaw(null)
+    patchConvMessages(convId, (m) => [...m, userMsg])
+    postUi(convId, { role: 'user', text })
+    const t0 = performance.now()
+    streamStartedRef.current.set(convId, t0)
+    setStreamTick((n) => n + 1)
+    patchConv(convId, {
+      draft: '',
+      streamLines: [],
+      liveElapsedMs: 0,
+      loading: true,
+      streamStartedAt: t0,
+      lastRaw: null,
+    })
 
     const url = getBiStreamPostUrl(baseUrl)
-    const t0 = performance.now()
     const env = { baseUrl, userId, apiConfig, accessToken }
 
     const patchTitleOnFirstTurn = () => {
       if (!accessToken || !wasThreadEmpty || !text) {
         return
       }
-      void apiPatchConversation(baseUrl, accessToken, chatId, {
+      void apiPatchConversation(baseUrl, accessToken, convId, {
         title: text.slice(0, 100),
       }).then(() => {
         refreshConversationList()
@@ -445,10 +551,10 @@ export function useBiChat() {
         buildBiStreamRequestInit(
           {
             message: text,
-            chatId,
+            chatId: convId,
             userId,
             responseMode,
-            attachmentIds: selectedAttachmentIds,
+            attachmentIds: conv.selectedAttachmentIds,
           },
           env,
         ),
@@ -466,19 +572,19 @@ export function useBiChat() {
             msg = errText.slice(0, 500)
           }
         }
-        const durationMs = Math.round(performance.now() - t0)
-        setMessages((m) => [
+        const durationMs = measureStreamDuration(convId, t0)
+        patchConvMessages(convId, (m) => [
           ...m,
           { id: crypto.randomUUID(), role: 'assistant', text: msg, durationMs },
         ])
-        postUi({ role: 'assistant', text: msg, durationMs })
+        postUi(convId, { role: 'assistant', text: msg, durationMs })
         patchTitleOnFirstTurn()
         return
       }
       if (!res.body) {
-        const durationMs = Math.round(performance.now() - t0)
+        const durationMs = measureStreamDuration(convId, t0)
         const em = t('chat.assistant.emptyBody')
-        setMessages((m) => [
+        patchConvMessages(convId, (m) => [
           ...m,
           {
             id: crypto.randomUUID(),
@@ -487,7 +593,7 @@ export function useBiChat() {
             durationMs,
           },
         ])
-        postUi({ role: 'assistant', text: em, durationMs })
+        postUi(convId, { role: 'assistant', text: em, durationMs })
         patchTitleOnFirstTurn()
         return
       }
@@ -495,24 +601,36 @@ export function useBiChat() {
       let doneEvent: (NdEvent & { t: 'done' }) | null = null
       for await (const ev of readNdjsonEvents(res.body)) {
         if (ev.t === 'status') {
-          setStreamLines((prev) => appendStreamLog(prev, ev.m))
+          setConvStates((prev) => {
+            const cur = prev[convId]
+            if (!cur) {
+              return prev
+            }
+            return {
+              ...prev,
+              [convId]: {
+                ...cur,
+                streamLines: appendStreamLog(cur.streamLines, ev.m),
+              },
+            }
+          })
         } else if (ev.t === 'error') {
-          const durationMs = Math.round(performance.now() - t0)
-          setLastRaw({ error: ev.message, stream: true })
-          setMessages((m) => [
+          const durationMs = measureStreamDuration(convId, t0)
+          patchConv(convId, { lastRaw: { error: ev.message, stream: true } })
+          patchConvMessages(convId, (m) => [
             ...m,
             { id: crypto.randomUUID(), role: 'assistant', text: ev.message, durationMs },
           ])
-          postUi({ role: 'assistant', text: ev.message, durationMs })
+          postUi(convId, { role: 'assistant', text: ev.message, durationMs })
           patchTitleOnFirstTurn()
           return
         } else if (ev.t === 'done') {
           doneEvent = ev
-          setLastRaw(ev)
+          patchConv(convId, { lastRaw: ev })
         }
       }
 
-      const durationMs = Math.round(performance.now() - t0)
+      const durationMs = measureStreamDuration(convId, t0)
       if (doneEvent) {
         const out =
           typeof doneEvent.output === 'string' ? doneEvent.output : null
@@ -525,7 +643,7 @@ export function useBiChat() {
             ? doneEvent.resultatSQL
             : null
         const noField = t('chat.assistant.noOutputField')
-        setMessages((m) => [
+        patchConvMessages(convId, (m) => [
           ...m,
           {
             id: crypto.randomUUID(),
@@ -536,13 +654,13 @@ export function useBiChat() {
           },
         ])
         if (out) {
-          postUi({ role: 'assistant', html: out, durationMs, requeteSQL, resultatSQL })
+          postUi(convId, { role: 'assistant', html: out, durationMs, requeteSQL, resultatSQL })
         } else {
-          postUi({ role: 'assistant', text: noField, durationMs, requeteSQL, resultatSQL })
+          postUi(convId, { role: 'assistant', text: noField, durationMs, requeteSQL, resultatSQL })
         }
       } else {
         const inc = t('chat.assistant.incomplete')
-        setMessages((m) => [
+        patchConvMessages(convId, (m) => [
           ...m,
           {
             id: crypto.randomUUID(),
@@ -551,13 +669,13 @@ export function useBiChat() {
             durationMs,
           },
         ])
-        postUi({ role: 'assistant', text: inc, durationMs })
+        postUi(convId, { role: 'assistant', text: inc, durationMs })
       }
       patchTitleOnFirstTurn()
     } catch (e) {
-      const durationMs = Math.round(performance.now() - t0)
+      const durationMs = measureStreamDuration(convId, t0)
       const err = e instanceof Error ? e.message : String(e)
-      setMessages((m) => [
+      patchConvMessages(convId, (m) => [
         ...m,
         {
           id: crypto.randomUUID(),
@@ -566,11 +684,17 @@ export function useBiChat() {
           durationMs,
         },
       ])
-      postUi({ role: 'assistant', text: err, durationMs })
+      postUi(convId, { role: 'assistant', text: err, durationMs })
       patchTitleOnFirstTurn()
     } finally {
-      setStreamLines([])
-      setLoading(false)
+      streamStartedRef.current.delete(convId)
+      setStreamTick((n) => n + 1)
+      patchConv(convId, {
+        streamLines: [],
+        loading: false,
+        streamStartedAt: null,
+        liveElapsedMs: 0,
+      })
     }
   }, [
     apiConfig,
@@ -578,23 +702,16 @@ export function useBiChat() {
     baseUrl,
     chatId,
     configOk,
-    draft,
-    loading,
-    messages.length,
+    convStates,
+    measureStreamDuration,
+    patchConv,
+    patchConvMessages,
     postUi,
     refreshConversationList,
+    responseMode,
     sessionOnly,
     t,
     userId,
-    responseMode,
-    selectedAttachmentIds,
-    setBanner,
-    setMessages,
-    setDraft,
-    setStreamLines,
-    setLoading,
-    setLastRaw,
-    setLiveElapsedMs,
   ])
 
   const onKeyDown = useCallback(
@@ -618,17 +735,19 @@ export function useBiChat() {
       setBanner(null)
       try {
         const row = await apiUploadConversationAttachment(baseUrl, accessToken, chatId, file)
-        setAttachments((prev) => [row, ...prev])
-        setSelectedAttachmentIds((prev) =>
-          prev.includes(row.id) ? prev : [...prev, row.id],
-        )
+        patchConv(chatId, (cur) => ({
+          attachments: [row, ...cur.attachments],
+          selectedAttachmentIds: cur.selectedAttachmentIds.includes(row.id)
+            ? cur.selectedAttachmentIds
+            : [...cur.selectedAttachmentIds, row.id],
+        }))
       } catch (e) {
         setBanner(e instanceof Error ? e.message : t('common.error'))
       } finally {
         setUploadingAttachment(false)
       }
     },
-    [accessToken, baseUrl, chatId, t],
+    [accessToken, baseUrl, chatId, patchConv, t],
   )
 
   const deleteAttachment = useCallback(
@@ -638,22 +757,29 @@ export function useBiChat() {
       }
       try {
         await apiDeleteConversationAttachment(baseUrl, accessToken, chatId, attachmentId)
-        setAttachments((prev) => prev.filter((a) => a.id !== attachmentId))
-        setSelectedAttachmentIds((prev) => prev.filter((x) => x !== attachmentId))
+        patchConv(chatId, (cur) => ({
+          attachments: cur.attachments.filter((a) => a.id !== attachmentId),
+          selectedAttachmentIds: cur.selectedAttachmentIds.filter(
+            (x) => x !== attachmentId,
+          ),
+        }))
       } catch (e) {
         setBanner(e instanceof Error ? e.message : t('common.error'))
       }
     },
-    [accessToken, baseUrl, chatId, t],
+    [accessToken, baseUrl, chatId, patchConv, t],
   )
 
-  const toggleAttachmentSelection = useCallback((attachmentId: string) => {
-    setSelectedAttachmentIds((prev) =>
-      prev.includes(attachmentId)
-        ? prev.filter((x) => x !== attachmentId)
-        : [...prev, attachmentId],
-    )
-  }, [])
+  const toggleAttachmentSelection = useCallback(
+    (attachmentId: string) => {
+      patchConv(chatId, (cur) => ({
+        selectedAttachmentIds: cur.selectedAttachmentIds.includes(attachmentId)
+          ? cur.selectedAttachmentIds.filter((x) => x !== attachmentId)
+          : [...cur.selectedAttachmentIds, attachmentId],
+      }))
+    },
+    [chatId, patchConv],
+  )
 
   return {
     baseUrl,
@@ -666,6 +792,7 @@ export function useBiChat() {
     draft,
     setDraft,
     loading,
+    streaming,
     banner,
     lastRaw,
     showRaw,
@@ -685,6 +812,7 @@ export function useBiChat() {
     conversationsError,
     selectConversation,
     deleteConversation,
+    loadingConversationIds,
     responseMode,
     setResponseMode,
     attachments,
