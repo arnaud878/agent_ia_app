@@ -36,6 +36,19 @@ export function AdminBiTablesPage() {
         {tab === 'tables' ? (
           <>
             <p className="sub">{t('admin.biTablesHint')}</p>
+            <div style={{ marginBottom: '0.6rem' }}>
+              <button
+                type="button"
+                className="btn ghost"
+                onClick={a.onFetchAvailableTables}
+                disabled={a.fetchingAvailableTables}
+                title={t('admin.biTablesFetchBtn')}
+              >
+                {a.fetchingAvailableTables
+                  ? t('admin.biTablesFetching')
+                  : `⟳ ${t('admin.biTablesFetchBtn')}`}
+              </button>
+            </div>
             <div className="form-row" style={{ maxWidth: '42rem' }}>
               <textarea
                 rows={16}

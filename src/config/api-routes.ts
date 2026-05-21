@@ -19,6 +19,7 @@ export const AuthPaths = {
 
 export const IamPaths = {
   biTables: '/iam/bi-tables',
+  biTablesAvailable: '/iam/bi-tables/available',
   biConnection: '/iam/bi-connection',
   llmSettings: '/iam/llm-settings',
   agentPrompts: '/iam/agent-prompts',

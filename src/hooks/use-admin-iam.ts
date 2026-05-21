@@ -4,6 +4,7 @@ import { useAuth } from '@/auth/AuthContext'
 import {
   apiCreateRole,
   apiCreateUser,
+  apiGetAvailableBiTables,
   apiGetBiConnection,
   apiGetLlmSettings,
   apiListBiTables,
@@ -51,6 +52,7 @@ export function useAdminIam() {
   const [biTablesDraft, setBiTablesDraft] = useState('')
   const [biConnectionDraft, setBiConnectionDraft] = useState('')
   const [biDbType, setBiDbType] = useState<BiDbType>('postgresql')
+  const [fetchingAvailableTables, setFetchingAvailableTables] = useState(false)
   const [llmProvider, setLlmProvider] = useState<LlmProvider>('gemini')
   const [llmModel, setLlmModel] = useState('gemini-2.5-flash')
   const [llmApiKey, setLlmApiKey] = useState('')
@@ -190,6 +192,28 @@ export function useAdminIam() {
     })()
   }
 
+  const onFetchAvailableTables = () => {
+    if (!token) return
+    setError(null)
+    setSuccess(null)
+    setFetchingAvailableTables(true)
+    void (async () => {
+      try {
+        const result = await apiGetAvailableBiTables(baseUrl, token)
+        if (result.length === 0) {
+          setError(t('admin.biTablesAvailableEmpty'))
+          return
+        }
+        setBiTablesDraft(result.join('\n'))
+        setSuccess(`${t('admin.success.biTablesAvailableFetched')} (${result.length})`)
+      } catch (e) {
+        setError(e instanceof Error ? e.message : t('common.error'))
+      } finally {
+        setFetchingAvailableTables(false)
+      }
+    })()
+  }
+
   const onSaveBiTables = () => {
     if (!token) {
       return
@@ -298,6 +322,8 @@ export function useAdminIam() {
     onCreateRole,
     openTableEditor,
     onSaveRoleTables,
+    fetchingAvailableTables,
+    onFetchAvailableTables,
     onSaveBiTables,
     onSaveBiConnection,
     onSaveLlmSettings,

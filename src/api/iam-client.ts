@@ -82,6 +82,17 @@ export async function apiSetBiTables(
   return j.tables
 }
 
+export async function apiGetAvailableBiTables(
+  baseUrl: string,
+  token: string,
+): Promise<string[]> {
+  const res = await fetch(apiUrl(baseUrl, IamPaths.biTablesAvailable), {
+    headers: authHeaders(token),
+  })
+  const j = await parseJson<{ tables: string[] }>(res)
+  return j.tables
+}
+
 export type BiDbType = 'postgresql' | 'mysql'
 
 export async function apiGetBiConnection(

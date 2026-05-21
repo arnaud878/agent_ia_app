@@ -142,6 +142,10 @@ const fr = {
   'admin.success.roleCreated': 'Rôle créé avec succès.',
   'admin.success.roleTablesUpdated': 'Tables du rôle mises à jour.',
   'admin.success.biTablesUpdated': 'Tables BI mises à jour.',
+  'admin.success.biTablesAvailableFetched': 'Tables récupérées depuis la base',
+  'admin.biTablesAvailableEmpty': 'Aucune table trouvée dans la base BI connectée.',
+  'admin.biTablesFetchBtn': 'Récupérer depuis la base',
+  'admin.biTablesFetching': 'Récupération…',
   'admin.success.biConnectionUpdated': 'Connexion base BI mise à jour.',
   'admin.success.llmUpdated': 'Paramètres LLM mis à jour.',
   'chat.error.session':
@@ -370,6 +374,10 @@ const en: Record<keyof typeof fr, string> = {
   'admin.success.roleCreated': 'Role created successfully.',
   'admin.success.roleTablesUpdated': 'Role tables updated.',
   'admin.success.biTablesUpdated': 'BI tables updated.',
+  'admin.success.biTablesAvailableFetched': 'Tables fetched from database',
+  'admin.biTablesAvailableEmpty': 'No tables found in the connected BI database.',
+  'admin.biTablesFetchBtn': 'Fetch from database',
+  'admin.biTablesFetching': 'Fetching…',
   'admin.success.biConnectionUpdated': 'BI connection updated.',
   'admin.success.llmUpdated': 'LLM settings updated.',
   'chat.error.session':
