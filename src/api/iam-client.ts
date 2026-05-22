@@ -93,7 +93,7 @@ export async function apiGetAvailableBiTables(
   return j.tables
 }
 
-export type BiDbType = 'postgresql' | 'mysql'
+export type BiDbType = 'postgresql' | 'mysql' | 'mssql'
 
 export async function apiGetBiConnection(
   baseUrl: string,

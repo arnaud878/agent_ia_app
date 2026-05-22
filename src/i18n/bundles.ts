@@ -165,7 +165,7 @@ const fr = {
   'admin.biDbTypeLabel': 'Type de base de données',
   'admin.biConnectionLabel': 'Chaîne de connexion base BI',
   'admin.biConnectionHint':
-    'Choisissez le type de base (PostgreSQL ou MySQL/MariaDB), renseignez la chaîne de connexion puis enregistrez. Laissez vide pour utiliser la connexion système (PostgreSQL).',
+    'Choisissez le type de base (PostgreSQL, MySQL/MariaDB ou Microsoft SQL Server), renseignez la chaîne de connexion puis enregistrez. Laissez vide pour utiliser la connexion système (PostgreSQL).',
   'admin.biConnectionSave': 'Enregistrer la connexion',
   'admin.titleLlm': 'Configuration LLM',
   'admin.introLlm':
@@ -397,7 +397,7 @@ const en: Record<keyof typeof fr, string> = {
   'admin.biDbTypeLabel': 'Database type',
   'admin.biConnectionLabel': 'BI database connection string',
   'admin.biConnectionHint':
-    'Select the database type (PostgreSQL or MySQL/MariaDB), fill in the connection string and save. Leave empty to use the system connection (PostgreSQL).',
+    'Select the database type (PostgreSQL, MySQL/MariaDB or Microsoft SQL Server), fill in the connection string and save. Leave empty to use the system connection (PostgreSQL).',
   'admin.biConnectionSave': 'Save connection',
   'admin.titleLlm': 'LLM Configuration',
   'admin.introLlm':

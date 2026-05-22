@@ -83,11 +83,12 @@ export function AdminBiTablesPage() {
                 id="bi-db-type"
                 value={a.biDbType}
                 onChange={(e) =>
-                  a.setBiDbType(e.target.value as 'postgresql' | 'mysql')
+                  a.setBiDbType(e.target.value as 'postgresql' | 'mysql' | 'mssql')
                 }
               >
                 <option value="postgresql">PostgreSQL</option>
                 <option value="mysql">MySQL / MariaDB</option>
+                <option value="mssql">Microsoft SQL Server</option>
               </select>
             </div>
             <div className="form-row" style={{ maxWidth: '52rem' }}>
@@ -100,7 +101,9 @@ export function AdminBiTablesPage() {
                 placeholder={
                   a.biDbType === 'mysql'
                     ? 'mysql://user:pass@host:3306/database'
-                    : 'postgres://user:pass@host:5432/database'
+                    : a.biDbType === 'mssql'
+                      ? 'Server=host,1433;Database=mydb;User Id=user;Password=pass;Encrypt=true'
+                      : 'postgres://user:pass@host:5432/database'
                 }
                 style={{
                   fontFamily: 'monospace',
