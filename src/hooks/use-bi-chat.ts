@@ -690,10 +690,15 @@ export function useBiChat() {
       streamStartedRef.current.delete(convId)
       setStreamTick((n) => n + 1)
       patchConv(convId, {
-        streamLines: [],
         loading: false,
         streamStartedAt: null,
         liveElapsedMs: 0,
+      })
+      /* Laisser React afficher une frame avec le journal (ex. phase 2 HTML) avant de le vider. */
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          patchConv(convId, { streamLines: [] })
+        })
       })
     }
   }, [

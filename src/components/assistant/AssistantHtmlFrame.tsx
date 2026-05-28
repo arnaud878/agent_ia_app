@@ -12,7 +12,7 @@ const EMBED: Record<
   AppTheme,
   { bg: string; text: string; scheme: 'light' | 'dark' }
 > = {
-  light: { bg: '#ffffff', text: '#111827', scheme: 'light' },
+  light: { bg: '#f3f4f6', text: '#111827', scheme: 'light' },
   dark: { bg: '#0f1117', text: '#f3f4f6', scheme: 'dark' },
 }
 
@@ -40,31 +40,31 @@ function buildThemedResponseStylesheet(
   }
   /* Cartes / conteneurs sombres (modèle) */
   html.ia-embed--light [style*="#121212"], html.ia-embed--light [style*="background-color: #121212"] {
-    background-color: #f9fafb !important;
+    background-color: #eef1f4 !important;
     color: #1f2937 !important;
   }
   html.ia-embed--light [style*="#1e1e1e"] {
-    background-color: #f3f4f6 !important;
+    background-color: #e8ebf0 !important;
     color: #1f2937 !important;
   }
   /* blocs #1a1a1a, gris bord, texte clair (recommandations, encarts) */
   html.ia-embed--light [style*="#1a1a1a"] {
-    background: #f3f4f6 !important;
-    background-color: #f3f4f6 !important;
+    background: #e8ebf0 !important;
+    background-color: #e8ebf0 !important;
     border: 1px dashed #94a3b8 !important;
     color: #1f2937 !important;
   }
   html.ia-embed--light [style*="#181818"],
   html.ia-embed--light [style*="#202020"],
   html.ia-embed--light [style*="#2a2a2a"] {
-    background: #f3f4f6 !important;
-    background-color: #f3f4f6 !important;
+    background: #e8ebf0 !important;
+    background-color: #e8ebf0 !important;
     color: #1f2937 !important;
   }
   /* #222 seul (éviter de matcher #2222…) : contexte "background" */
   html.ia-embed--light [style*="background: #222"],
   html.ia-embed--light [style*="background:#222"] {
-    background: #f3f4f6 !important;
+    background: #e8ebf0 !important;
     color: #1f2937 !important;
   }
   html.ia-embed--light ul[style*="#ccc"],
@@ -72,7 +72,7 @@ function buildThemedResponseStylesheet(
     color: #4b5563 !important;
   }
   html.ia-embed--light [style*="#111827"] {
-    background-color: #f9fafb !important;
+    background-color: #eef1f4 !important;
     color: #111827 !important;
   }
   html.ia-embed--light p[style*="#b0b0b0"],
@@ -87,7 +87,7 @@ function buildThemedResponseStylesheet(
     color: #111827 !important;
   }
   html.ia-embed--light table[style*="#1e1e1e"] {
-    background-color: #f9fafb !important;
+    background-color: #eef1f4 !important;
     color: #1f2937 !important;
   }
   html.ia-embed--light [style*="#e0e0e0"] { color: #374151 !important; }
@@ -107,6 +107,35 @@ function buildThemedResponseStylesheet(
   html.ia-embed--light [style*="187, 187, 187"], html.ia-embed--light [style*="#bebebe"] {
     color: #374151 !important;
   }
+  html.ia-embed--light [style*="#c8c8c8"] { color: #4b5563 !important; }
+  /* Rapports BI (gabarit report-html.builder) */
+  html.ia-embed--light .ia-bi-report { color: #374151 !important; }
+  html.ia-embed--light .ia-bi-report .ia-report-body,
+  html.ia-embed--light .ia-bi-report .ia-report-list,
+  html.ia-embed--light .ia-bi-report p.ia-report-body,
+  html.ia-embed--light .ia-bi-report li.ia-report-body,
+  html.ia-embed--light .ia-bi-report span.ia-report-body {
+    color: #4b5563 !important;
+  }
+  html.ia-embed--light .ia-bi-report .ia-report-strong,
+  html.ia-embed--light .ia-bi-report strong.ia-report-strong {
+    color: #111827 !important;
+  }
+  html.ia-embed--light .ia-bi-report [style*="border:1px solid #444"] {
+    border-color: #d8dce3 !important;
+    background-color: #eef1f4 !important;
+  }
+  html.ia-embed--light .ia-bi-report [style*="border-left:4px solid"],
+  html.ia-embed--light .ia-bi-report [style*="border-left:3px solid"] {
+    background-color: #eef1f4 !important;
+  }
+  html.ia-embed--light .ia-bi-report td[style*="border-bottom:1px solid #333"] {
+    border-bottom-color: #e5e7eb !important;
+  }
+  html.ia-embed--light .ia-bi-report .ia-report-body[style*="rgba(78, 121, 167"] {
+    background-color: #e8edf3 !important;
+    color: #374151 !important;
+  }
 </style>`
   }
   return `<style data-ia-embed="dark">
@@ -117,6 +146,9 @@ function buildThemedResponseStylesheet(
   }
   /* Si le modèle a mis du “clair” partout, rétablir un canvas lisible en sombre */
   html.ia-embed--dark [style*="#f9fafb"] { color: #e5e7eb !important; }
+  html.ia-embed--dark .ia-bi-report { color: #e0e0e0 !important; }
+  html.ia-embed--dark .ia-bi-report .ia-report-body { color: #d1d5db !important; }
+  html.ia-embed--dark .ia-bi-report .ia-report-strong { color: #f3f4f6 !important; }
 </style>`
 }
 
@@ -133,16 +165,56 @@ function buildEmbedFitStylesheet(): string {
   return `<style data-ia-embed-fit>
   html.ia-embed--light, html.ia-embed--dark { min-height: 0 !important; }
   html.ia-embed--light body, html.ia-embed--dark body { min-height: 0 !important; }
+  .ia-bi-report-chart {
+    position: relative;
+    height: 360px;
+    max-height: min(360px, 50vh);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .ia-bi-report-chart canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+  }
 </style>`
 }
 
+/** Mesure la hauteur réelle du contenu, pas celle gonflée par Chart.js / scrollHeight du document. */
 function measureEmbeddedContentHeight(doc: Document, body: HTMLElement): number {
+  const win = doc.defaultView
+  const bodyRect = body.getBoundingClientRect()
+  const bodyStyle = win?.getComputedStyle(body)
+  const bodyPad =
+    (bodyStyle ? parseFloat(bodyStyle.paddingTop) + parseFloat(bodyStyle.paddingBottom) : 0) ||
+    0
+
+  const report = body.querySelector<HTMLElement>('.ia-bi-report')
+  if (report) {
+    const r = report.getBoundingClientRect()
+    return Math.ceil(r.bottom - bodyRect.top + bodyPad + 8)
+  }
+
+  let maxBottom = 0
+  for (const child of Array.from(body.children)) {
+    if (!(child instanceof HTMLElement)) {
+      continue
+    }
+    const r = child.getBoundingClientRect()
+    maxBottom = Math.max(maxBottom, r.bottom - bodyRect.top)
+  }
+  if (maxBottom > 0) {
+    return Math.ceil(maxBottom + bodyPad + 8)
+  }
+
   const root = doc.documentElement
-  const raw = Math.max(
+  const raw = Math.min(
     body.scrollHeight,
     body.offsetHeight,
-    root?.scrollHeight ?? 0,
-    root?.offsetHeight ?? 0,
+    root?.scrollHeight ?? body.scrollHeight,
+    root?.offsetHeight ?? body.offsetHeight,
   )
   return Math.ceil(raw)
 }
@@ -240,6 +312,9 @@ function patchChartJsInFrame(
   doc: Document,
   isDark: boolean,
 ) {
+  if (!doc.documentElement) {
+    return
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Chart = (win as { Chart?: any }).Chart
   if (typeof Chart === 'undefined' || !Chart?.defaults) {
@@ -321,29 +396,41 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
 
   const applyThemedDocumentSurface = useCallback(() => {
     const el = iframeRef.current
-    const doc = el?.contentDocument
-    if (!doc) {
+    if (!el?.isConnected) {
       return
     }
-    doc.documentElement.style.background = embed.bg
-    doc.documentElement.style.colorScheme = embed.scheme
-    if (doc.body) {
-      doc.body.style.background = embed.bg
-      doc.body.style.color = embed.text
+    const doc = el.contentDocument
+    const root = doc?.documentElement
+    if (!doc || !root) {
+      return
+    }
+    try {
+      root.style.background = embed.bg
+      root.style.colorScheme = embed.scheme
+      if (doc.body) {
+        doc.body.style.background = embed.bg
+        doc.body.style.color = embed.text
+      }
+    } catch {
+      /* iframe en cours de déchargement */
     }
   }, [embed])
 
   const fitHeight = useCallback(() => {
     const el = iframeRef.current
-    const doc = el?.contentDocument
-    const win = el?.contentWindow
-    if (doc) {
-      applyThemedDocumentSurface()
-      if (win) {
-        patchChartJsInFrame(win, doc, colorScheme === 'dark')
-      }
+    if (!el?.isConnected) {
+      return
     }
-    const body = doc?.body
+    const doc = el.contentDocument
+    if (!doc?.documentElement) {
+      return
+    }
+    const win = el.contentWindow
+    applyThemedDocumentSurface()
+    if (win) {
+      patchChartJsInFrame(win, doc, colorScheme === 'dark')
+    }
+    const body = doc.body
     if (!body) {
       return
     }
@@ -365,9 +452,13 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
 
   useEffect(() => {
     const el = iframeRef.current
+    let alive = true
     let ro: ResizeObserver | undefined
     let raf = 0
     const run = () => {
+      if (!alive) {
+        return
+      }
       fitHeight()
     }
     const scheduleFit = () => {
@@ -384,16 +475,15 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
     const t3 = window.setTimeout(run, 2000)
     const attachResizeObserver = () => {
       const doc = el?.contentDocument
-      const root = doc?.documentElement
-      if (!root || typeof ResizeObserver === 'undefined') {
+      const observeTarget =
+        doc?.body?.querySelector<HTMLElement>('.ia-bi-report') ??
+        doc?.body
+      if (!observeTarget || typeof ResizeObserver === 'undefined') {
         return
       }
       ro?.disconnect()
       ro = new ResizeObserver(() => scheduleFit())
-      ro.observe(root)
-      if (doc.body) {
-        ro.observe(doc.body)
-      }
+      ro.observe(observeTarget)
     }
     const onFrameLoad = () => {
       run()
@@ -405,6 +495,7 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
       onFrameLoad()
     }
     return () => {
+      alive = false
       if (raf) {
         cancelAnimationFrame(raf)
       }
@@ -449,7 +540,9 @@ export function AssistantHtmlFrame({ messageId, html, colorScheme }: Props) {
       className="bubble-html-iframe"
       title="Réponse affichage riche (HTML / graphiques)"
       srcDoc={srcDoc}
-      onLoad={fitHeight}
+      onLoad={() => {
+        requestAnimationFrame(() => fitHeight())
+      }}
       style={{
         width: '100%',
         minWidth: 0,

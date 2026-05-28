@@ -9,14 +9,14 @@
 html[data-theme='light'] {
   --text: #6b6375;
   --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
+  --bg: #f0f2f5;
+  --border: #d8dce3;
+  --code-bg: #e8eaef;
   --accent: #aa3bff;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
-  --card-bg: #fafaf8;
-  --iframe-embed-bg: #ffffff;
+  --card-bg: #f7f8fa;
+  --iframe-embed-bg: #f3f4f6;
   --iframe-text: #111827;
   color-scheme: light;
   color: var(--text);
